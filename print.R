@@ -49,6 +49,34 @@ print.SBP.result=function(sbp.result,knt=T,tbl=T,txt=T,method=T,ref=T)
 
 }
 
+word.table=function(SBP.result)
+  
+{
+  if (!is.null(SBP.result$tbl))
+  {
+    tbl.res=SBP.result$tbl
+    if (is.data.frame(tbl.res)) tbl.res=list(tbl=SBP.result$tbl)
+    if (!is.list(tbl.res)) tbl.res=list(tbl=SBP.result$tbl)
+    n.tbl=length(tbl.res)
+    for (i in 1:n.tbl)
+    {
+      if (!is.null(tbl.res[[i]]))
+      {
+        res.name=NA
+          if (is.numeric(tbl.res[[i]])&&(!is.null(attr(SBP.result,"result.name"))))
+            res.name=attr(SBP.result,"result.name")
+          write.table(tbl.res[[i]],col.names=res.name,quote=F,file="",sep=",")
+      }
+      write("\n \n",file="")
+    }
+    write("**INSTRUCTIONS**",file="")
+    write("For each section of output above:")
+    write("1. Copy the output into Word.",file="")
+    write("2. Highlight the output in Word.",file="")
+    write("3. Go to Insert>Table>Convert Text to Table.",file="")
+  }
+  
+}
 
 SBP.example.Rmd.slides=function(SBP.code.string,slide.title)
   

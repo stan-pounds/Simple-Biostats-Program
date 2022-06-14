@@ -29,7 +29,7 @@ print.SBP.result=function(sbp.result,knt=T,tbl=T,txt=T,method=T,ref=T)
 
   if ((!is.null(sbp.result$txt))&&(txt))
   {
-    write("\n \n **RESULTS** \n ",file="")
+    write("\n **RESULTS** \n ",file="")
     
     write(paste(sbp.result$txt,collapse=""),file="")
   }

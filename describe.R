@@ -83,7 +83,7 @@ describe.event.timing=function(x,
     cum.event=cumsum(res.tbl$n.event)
     
     
-    res.txt=""
+    res.txt=NULL
     if (txt>0)
     {
       txt1=paste0("The event-time variable ",nmx," was observed for a cohort of ",

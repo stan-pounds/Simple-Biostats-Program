@@ -8,14 +8,14 @@ describe=function(clm.name,    # name of column in quotation marks
                   fig=1,       # figure output (0=none; 1=basic; 2 and higher = more)
                   txt=1,       # narrative output (0=none; 1=basic; 2=detailed)
                   clr=NULL,    # color(s) to use
-                  x.name=NULL) # name of x in quotation marks for narrative
+                  y.name=NULL) # name of x in quotation marks for narrative
   
 {
 
-  if (is.null(x.name))
+  if (is.null(y.name))
   {
     cll=deparse(match.call())
-    x.name=get.arg(cll,"clm.name")
+    y.name=get.arg(cll,"clm.name")
   }
   
   x=data[,clm.name]
@@ -23,13 +23,13 @@ describe=function(clm.name,    # name of column in quotation marks
   
   res=NULL
   if(any(cls%in%c("numeric","double","integer")))
-    res=describe.numeric(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=x.name)
+    res=describe.numeric(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=y.name)
   
   if(any(cls%in%c("character","factor","ordered")))
-    res=describe.categorical(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=x.name)
+    res=describe.categorical(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=y.name)
   
   if(any(cls%in%c("Surv","competing.events")))
-    res=describe.event.timing(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=x.name)
+    res=describe.event.timing(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=y.name)
   
   if (is.null(res))
     stop("Invalid input class.")
@@ -239,7 +239,7 @@ describe.categorical=function(x,
   temp.dset=cbind.data.frame(x=x)
   if (fig>0)
   {
-    bar.plot("x",temp.dset,all=F,x.name=nmx,clr=clr)
+    bar.plot("x",temp.dset,all=F,y.name=nmx,clr=clr)
     if (fig>1) pie.plot("x",temp.dset,nmx,clr=clr)
   }
 

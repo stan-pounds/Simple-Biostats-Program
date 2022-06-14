@@ -400,16 +400,13 @@ mosaic.plot=function(form,data,clr="rainbow",
   nm.grp=grp.clm
   
   if (is.null(y.name)) y.name=nm.cty
-  if (is.null(grp.name)) grp.name=
+  if (is.null(grp.name)) grp.name=nm.grp
     
-    nm.cty=y.name
+  nm.cty=y.name
   nm.grp=grp.name
   
   names(dimnames(full.tbl))=c(nm.grp,nm.cty)
   names(dimnames(avl.tbl))=c(nm.grp,nm.cty)
-  
-  cty.desc=describe.categorical(cty)
-  grp.desc=describe.categorical(grp)
   
   uniq.cty=unique(cty)
   clrs=define.colors(length(uniq.cty),clr)

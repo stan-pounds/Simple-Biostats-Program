@@ -356,7 +356,7 @@ describe.numeric=function(x,            # variable to describe
   ##############################################
   # narrative text
   dgts=ceiling(diff(range(log10(as.numeric(unlist(x))),na.rm=T)))
-  res.txt=""
+  res.txt=NULL
   if (txt>0)
   {
     res.txt=paste0("The variable ",nmx," has ", smry.stats["n.total"], 
@@ -380,7 +380,7 @@ describe.numeric=function(x,            # variable to describe
     res.txt=c(res.txt,more.txt)
   }
   
-  res.txt=paste0(res.txt,collapse="")
+  if (txt>0) res.txt=paste0(res.txt,collapse="")
   
   method=paste0("The Shapiro-Wilk (1965) test was used to evaluate the normality of the distribution of ",nmx,".  ")
   

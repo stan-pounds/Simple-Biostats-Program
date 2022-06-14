@@ -54,10 +54,10 @@ box.plot=function(input,data,y.name=NULL,clr="rainbow")
 ###########################################
 # SBP pie plot
 
-pie.plot=function(clm.name,data,x.name=NULL,all=F,clr=NULL)
+pie.plot=function(y.clm,data,y.name=NULL,all=F,clr=NULL)
   
 {
-  x=data[,clm.name]
+  x=data[,y.clm]
   
   avl.tbl=table(x)
   all.tbl=table(x,exclude=NULL)
@@ -70,7 +70,7 @@ pie.plot=function(clm.name,data,x.name=NULL,all=F,clr=NULL)
   if (all&&(n.miss>0)) sub.txt="includes missing data as a distinct category"
   if (n.miss==0) sub.txt="no missing observations"
   
-  if (is.null(x.name)) x.name=clm.name
+  if (is.null(y.name)) y.name=y.clm
   
   clrs=define.colors(length(res.tbl),clr)
   
@@ -79,7 +79,7 @@ pie.plot=function(clm.name,data,x.name=NULL,all=F,clr=NULL)
   par.opts=par()
   par(mar=rep(6,4)+0.1)
   pie(pct.tbl,col=clrs,
-      main=x.name,cex.main=1.5,
+      main=y.name,cex.main=1.5,
       labels=paste0(names(res.tbl),
                     "\n (n = ",res.tbl,
                     "; ",round(pct.tbl,2),"%)"),
@@ -91,12 +91,12 @@ pie.plot=function(clm.name,data,x.name=NULL,all=F,clr=NULL)
 ###############################################
 # SBP bar plot
 
-bar.plot=function(clm.name,data,all=F,x.name=NULL,clr=NULL)
+bar.plot=function(y.clm,data,all=F,y.name=NULL,clr=NULL)
   
 {
-  if (is.null(x.name)) x.name=clm.name
+  if (is.null(y.name)) y.name=y.clm
     
-  x=data[,clm.name]
+  x=data[,y.clm]
   
   
   if (class(x)[1]%in%c("ordered","factor","character"))
@@ -117,7 +117,7 @@ bar.plot=function(clm.name,data,all=F,x.name=NULL,clr=NULL)
     par.opts=par()
     par(mar=c(6,12,4,2)+0.1)
     bp.res=barplot(res.tbl,horiz=T,cex.names=1.5,
-                   xlab=paste0(x.name," (n)"),col=clrs,las=1,
+                   xlab=paste0(y.name," (n)"),col=clrs,las=1,
                    cex.axis=1.25,cex.lab=1.5,xlim=c(0,1.2)*max(res.tbl),
                    sub=sub.txt)
     text(res.tbl,bp.res,paste0("n = ",res.tbl,"\n (",round(pct.tbl,2)," %)"),cex=1,pos=4)
@@ -126,12 +126,12 @@ bar.plot=function(clm.name,data,all=F,x.name=NULL,clr=NULL)
   
   if (class(x)[1]%in%c("numeric","integer","double"))
   {
-    clrs=define.colors(1,clr)
+    if (is.null(clr)) clrs="gray"
     hst=hist(x,plot=F)
     par.opts=par()
     par(mar=c(6,6,2,1))
     hst=hist(x,col=clrs[1],cex.lab=1.5,prob=F,main="",cex.axis=1.5,
-             xlab=x.name,las=1,ylim=c(0,1.1)*max(hst$counts),ylab="Number")
+             xlab=y.name,las=1,ylim=c(0,1.1)*max(hst$counts),ylab="Number")
     text(hst$mids,hst$counts,hst$counts,pos=3)
     par(mar=par.opts$mar)
   }
@@ -140,16 +140,16 @@ bar.plot=function(clm.name,data,all=F,x.name=NULL,clr=NULL)
 ##########################################################
 # normal quantile-quantile plot
 
-nqq.plot=function(clm.name,data,x.name=NULL,clr="black")
+nqq.plot=function(y.clm,data,y.name=NULL,clr="black")
   
 {
-  if (is.null(x.name)) x.name=clm.name
-  x=data[,clm.name]
+  if (is.null(y.name)) y.name=y.clm
+  x=data[,y.clm]
   clrs=define.colors(1,clr)
   par.opts=par()
   par(mar=c(6,6,2,1))
   qqnorm(x,xlab="Standard Normal Quantile",main="",
-         ylab=paste0("Actual Value of ",x.name),
+         ylab=paste0("Actual Value of ",y.name),
          cex.lab=1.5,cex.axis=1.5)
   qqline(x)
   par(mar=par.opts$mar)
@@ -159,7 +159,7 @@ nqq.plot=function(clm.name,data,x.name=NULL,clr="black")
 #########################################################
 # Event plot
 
-event.plot=function(input,data,x.name=NULL,clr=NULL)
+event.plot=function(input,data,y.name=NULL,clr=NULL)
   
 {
   if (class(input)=="character")
@@ -171,7 +171,7 @@ event.plot=function(input,data,x.name=NULL,clr=NULL)
     
     
     # if nmx not provided then extract it from the input
-    if (is.null(x.name)) x.name=input
+    if (is.null(y.name)) y.name=input
     
     # Kaplan-Meier curves
     if(cls=="Surv")
@@ -179,7 +179,7 @@ event.plot=function(input,data,x.name=NULL,clr=NULL)
       clr=define.colors(1,clr)
       km=survfit(x~1)
       
-      ylbl=paste0("Pr(",x.name,")")
+      ylbl=paste0("Pr(",y.name,")")
       plot(km,las=1,conf.int=F,mark.time=T,lwd=2,
            cex.axis=1.5,cex.lab=1.5,ylab=ylbl,
            xlab="Time",col=clr)
@@ -377,6 +377,62 @@ scatter.plot=function(form,data,
     abline(y.mn,0,col=clr)
   }
   
+}
+
+############################################
+# mosaic plot
+
+mosaic.plot=function(form,data,clr="rainbow",
+                     y.name=NULL,grp.name=NULL)
+  
+{
+  form.vars=get.vars(form)
+  cty.clm=form.vars$y.var
+  grp.clm=form.vars$x.var[1]
+  
+  cty=data[,cty.clm]
+  grp=data[,grp.clm]
+  
+  full.tbl=table(grp,cty,exclude=NULL)
+  avl.tbl=table(grp,cty)
+  
+  nm.cty=cty.clm
+  nm.grp=grp.clm
+  
+  if (is.null(y.name)) y.name=nm.cty
+  if (is.null(grp.name)) grp.name=
+    
+    nm.cty=y.name
+  nm.grp=grp.name
+  
+  names(dimnames(full.tbl))=c(nm.grp,nm.cty)
+  names(dimnames(avl.tbl))=c(nm.grp,nm.cty)
+  
+  cty.desc=describe.categorical(cty)
+  grp.desc=describe.categorical(grp)
+  
+  uniq.cty=unique(cty)
+  clrs=define.colors(length(uniq.cty),clr)
+  
+  n.full=sum(full.tbl)
+  n.avl=sum(avl.tbl)
+  
+  if (n.full==n.avl)
+  {
+    mosaicplot(full.tbl,col=clrs,las=1,xlab=nm.grp,ylab=nm.cty,main="",
+               cex.axis=1,
+               sub="No Missing Data")
+  } else {
+    
+    mosaicplot(full.tbl,col=clrs,las=1,xlab=nm.grp,ylab=nm.cty,main="",
+               cex.axis=1,
+               sub="Includes Missing Data as a Distinct Category")
+    mosaicplot(avl.tbl,col=clrs,las=1,xlab=nm.grp,ylab=nm.cty,main="",
+               cex.axis=1,
+               sub="Excludes Missing Data")
+  }
+  
+
 }
 
 

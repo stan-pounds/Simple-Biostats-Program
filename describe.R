@@ -11,6 +11,7 @@ describe=function(clm.name,    # name of column in quotation marks
                   x.name=NULL) # name of x in quotation marks for narrative
   
 {
+
   if (is.null(x.name))
   {
     cll=deparse(match.call())

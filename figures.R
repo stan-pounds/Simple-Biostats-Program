@@ -126,7 +126,8 @@ bar.plot=function(y.clm,data,all=F,y.name=NULL,clr=NULL)
   
   if (class(x)[1]%in%c("numeric","integer","double"))
   {
-    if (is.null(clr)) clrs="gray"
+    if (is.null(clr)) clr="gray"
+    clrs=define.colors(1,clr)
     hst=hist(x,plot=F)
     par.opts=par()
     par(mar=c(6,6,2,1))

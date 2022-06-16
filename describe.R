@@ -77,7 +77,7 @@ describe.event.timing=function(x,
     if (fig>0)
     {
       temp.dset=cbind.data.frame(x=x)
-      event.plot("x",temp.dset,x.name=nmx,clr=clr)
+      event.plot("x",temp.dset,y.name=nmx,clr=clr)
     }
 
     res.tbl=summary(km,times=pretty(c(0,max(x[,1]))))
@@ -356,7 +356,7 @@ describe.numeric=function(x,            # variable to describe
 
   ##############################################
   # narrative text
-  dgts=ceiling(diff(range(log10(as.numeric(unlist(x))),na.rm=T)))
+  dgts=ceiling(diff(range(log10(abs(as.numeric(unlist(x)))),na.rm=T)))
   res.txt=NULL
   if (txt>0)
   {

@@ -361,13 +361,13 @@ scatter.plot=function(form,data,
   if (line%in%1)
   {
 
-    if (!sw.sig) abline(lm.fit,col=clr)
+    if (!sw.sig) abline(lm.fit,col=clrs)
     if (sw.sig)
     {
       y.hat=approx(ry,y,xout=rr.fit$fitted.values)$y
       x.plt=approx(rx,x,xout=rr.fit$x[,"rx"])$y
       ord=order(x.plt)
-      lines(x.plt[ord],y.hat[ord])
+      lines(x.plt[ord],y.hat[ord],col=clrs)
     }
     
   }
@@ -375,7 +375,7 @@ scatter.plot=function(form,data,
   if (line%in%0)
   {
     y.mn=mean(y)
-    abline(y.mn,0,col=clr)
+    abline(y.mn,0,col=clrs)
   }
   
 }

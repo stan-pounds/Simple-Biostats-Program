@@ -13,6 +13,7 @@ compare=function(form,data,
   y=data[,y.clm]
   
   
+  
   if (any(class(y)%in%c("Surv","competing.events")))
   {
     res=compare.events(form,data,txt,tbl,fig,y.name,grp.name,clr)
@@ -25,7 +26,7 @@ compare=function(form,data,
     return(res)
   }
   
-  if (class(y)%in%c("factor","character","ordered"))
+  if (any(class(y)%in%c("factor","character","ordered")))
   {
     res=compare.proportions(form,data,txt,tbl,fig,y.name,grp.name,clr)
     return(res)
@@ -49,23 +50,52 @@ compare.events=function(form,
   form.vars=get.vars(form)
   y.clm=form.vars$y.var
   y=data[,y.clm]
+  y.cls=class(y)[1]
   
-  if (class(y)=="Surv")
+  grp.clm=form.vars$x.var
+
+  
+  if (is.null(name.y)) name.y=y.clm
+  if (is.null(name.grp)) name.grp=grp.clm
+    
+  if (y.cls=="Surv")
   {
     sfit=survfit(form,data=data)
+    log.rank=survdiff(form,data)
+    df=length(log.rank$n)-1
+    p.value=pchisq(log.rank$chisq,df,lower.tail=F)
+    sig=p.value<0.05
+    grp.list=names(log.rank$n)
+    eq.pos=regexpr("=",grp.list,fixed=T)
+    grp.list=substring(grp.list,eq.pos+1)
     stbl=summary(sfit,times=pretty(c(0,max(y[,1]))))
+    res.tbl=cbind.data.frame(group=as.character(stbl$strata),
+                             time=stbl$time,
+                             n.risk=stbl$n.risk,
+                             n.event=stbl$n.event,
+                             n.censor=stbl$n.censor,
+                             surv=stbl$surv,
+                             LB95=stbl$lower,
+                             LB95=stbl$upper)
     n.grp=length(levels(stbl$strata))
     clrs=define.colors(n.grp,clr)
     plot(sfit,col=clrs,lwd=2,las=1,
          xlab=paste0("Time"),
          ylab=y.clm)
-    res.txt=""
-    res=list(tbl=stbl,
-             txt=res.txt)
+    res.txt=paste0("There is ",c("not","")[1+sig]," statistically compelling evidence ",
+                   "that the ",name.y," distribution differs across the ",name.grp,
+                   " groups ",text.list(grp.list)," (p = ",p.value,").  ")
+    ref="Harrington, D. P. and Fleming, T. R. (1982). A class of rank test procedures for censored survival data. Biometrika 69, 553-566."
+    method=paste0("The log-rank test (Harrington and Fleming 1982) was used to compare the ",
+                  "distribution of ",name.y," across the ",name.grp," groups ",text.list(grp.list),".  ")
+    res=list(tbl=res.tbl,
+             txt=res.txt,
+             method=method,
+             ref=ref)
     return(res)
   }
   
-  if (class(y)=="competing.events")
+  if (y.cls=="competing.events")
   {
     grp.clm=form.vars$x.var
     grp=data[,grp.clm]
@@ -387,7 +417,7 @@ compare.proportions=function(form,
   nm.grp=grp.clm
   
   if (is.null(y.name)) y.name=nm.cty
-  if (is.null(grp.name)) grp.name=
+  if (is.null(grp.name)) grp.name=nm.grp
   
   nm.cty=y.name
   nm.grp=grp.name
@@ -403,17 +433,14 @@ compare.proportions=function(form,
   
   if (fig>0)
   {
-    mosaicplot(full.tbl,col=clrs,las=1,xlab=nm.grp,ylab=nm.cty,main="",
-               sub="Includes Missing Data as a Distinct Category")
-    mosaicplot(avl.tbl,col=clrs,las=1,xlab=nm.grp,ylab=nm.cty,main="",
-               sub="Excludes Missing Data")
+    mosaic.plot(form,data,clr,y.name,grp.name)
   }
 
   
   full.test=cx.test(full.tbl)
   avl.test=cx.test(avl.tbl)
   
-  res.txt=""
+  res.txt=NULL
   
   if (txt>0)
   {
@@ -445,11 +472,15 @@ compare.proportions=function(form,
                 avl.test$method," was used to evaluate the association of ",
                 y.name," with ",grp.name," after exclusion of missing data.  ")
   
-  fisher.used=any(c(substring(full.test$method,1,5),
-                    substring(avl.test$method,1,5))%in%"Fisher")
-  chisq.used=any(c(substring(full.test$method,1,5),
-                   substring(avl.test$method,1,5))%in%"Pears")
+
+  
+  fisher.used=any(c(substring(full.test$method,1,6),
+                    substring(avl.test$method,1,6))%in%"Fisher")
+  chisq.used=any(c(substring(full.test$method,1,7),
+                   substring(avl.test$method,1,7))%in%"Pearson")
     
+
+  
   fisher.ref="Fisher, R. A. (1962). Confidence limits for a cross-product ratio. Australian Journal of Statistics, 4, 41. doi: 10.1111/j.1467-842X.1962.tb00285.x."
   chisq.ref="Hope, A. C. A. (1968). A simplified Monte Carlo significance test procedure. Journal of the Royal Statistical Society Series B, 30, 582-598. doi: 10.1111/j.2517-6161.1968.tb00759.x. https://www.jstor.org/stable/2984263."
   

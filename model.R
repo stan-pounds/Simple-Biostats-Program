@@ -3,7 +3,7 @@
 
 model=function(form,data,
                tbl=1,fig=1,txt=1,
-               clr="rainbow")
+               clr=NULL)
   
 {
   form.vars=get.vars(form)
@@ -16,9 +16,10 @@ model=function(form,data,
     return(res)
   }
   
-  if (class(y)%in%c("numeric"))
+  if (class(y)%in%c("numeric","double","integer"))
   {
     y.binary=all(is.element(y,c(0:1,NA)))
+    if (is.null(clr)) clr="black"
     if (y.binary)
     {
       message(paste0("R is modeling Pr(",y.clm," = 1)."))
@@ -69,8 +70,9 @@ model.events=function(form,data,
   
   if (class(y)=="Surv")
   {
-    cox.res=coxph(form,data,y=T)
-    res=coxph.txt(cox.res)
+    cox.res=coxph(form,data)
+    cox.tbl=fit.cox(form,data)
+    #txtres=coxph.txt(cox.res)
     y.hat=cox.res$linear.predictors
     
     
@@ -78,17 +80,13 @@ model.events=function(form,data,
     {
       grp=cut(y.hat,c(-Inf,quantile(y.hat,(1:2)/3,na.rm=T),Inf))
       srv=cox.res$y
-      
-      sfit=survfit(srv~grp)
-      clrs=define.colors(3,clr)
-      plot(sfit,main=y.clm,
-           xlim=c(0,1.25)*max(y[,1],na.rm=T),lwd=2,
-           col=clrs,las=1,xlab="Time",ylab="Prob")
-      legend(1.05*max(y[,1],na.rm=T),1,lwd=2,col=clrs,
-             legend=paste0("model ",c("low","int","high")," risk"),
-             cex=0.75)
-      
+      temp.dset=cbind.data.frame(srv,grp,y.hat)
+      event.plot(srv~y.hat,temp.dset,clr=clr)
     }
+    
+    res=model.txt(cox.res)
+    
+    class(res)="SBP.result"
     
     return(res)
   }
@@ -205,9 +203,26 @@ model.binary=function(form,data,
 
 model.numeric=function(form,data,
                        tbl=1,fig=3,txt=1,
-                       clr="rainbow")
+                       clr="black")
   
 {
+  form.vars=get.vars(form)
+  x.clm=form.vars$x.var
+  y.clm=form.vars$y.var
+
+  for (i in x.clm)
+  {
+    x=data[,i]
+    cls=class(x)
+    if (any(cls=="ordered"))
+    {
+      x=as.character(x)
+      data[,i]=x
+    }
+  }
+  
+  
+  
   glm.res=glm(formula=form,data=data)
   res.tbl=glm.tbl(glm.res)
   
@@ -216,124 +231,211 @@ model.numeric=function(form,data,
   y.hat=predict(glm.res)
   y.obs=glm.res$y
   
-  if (fig>1)
-  {
-    plot(y.hat,y.obs,
-         xlab="Model Prediction",
-         ylab="Observed Value")
-    abline(0,1)
-  }
-
-  if (fig>2)
-  {
-    plot(y.hat,r,
-         xlab="Model Prediction",
-         ylab="Model Error (Observed-Prediction)")
-    abline(0,0)
-  }
-
-  if (fig>3)
-  {
-    qqnorm(r,xlab="Standard Normal Quantile",
-           ylab="Quantile of Model Error",
-           sub=paste0("Shapiro-Wilk p = ",r.sw$p.value))
-    qqline(r)
-  }
-
   
   
-  res=list(tbl=res.tbl,
-           txt="")
+  temp.dset=cbind.data.frame(y=y.obs,y.hat=y.hat,r=r)
   
+  if (fig>0) scatter.plot(y~y.hat,temp.dset,clr,line=1,
+                          x.name=paste0("Model Prediction of ",y.clm),
+                          y.name=paste0("Observed Value of ",y.clm))
+  if (fig>1) scatter.plot(r~y.hat,temp.dset,line=0,
+                          x.name=paste0("Model Prediction of ",y.clm),
+                          y.name=paste0(y.clm," Error (Actual-Predicted)"))
+  if (fig>2) bar.plot("r",temp.dset,paste0(y.clm," Error (Actual-Predicted)"),clr="gray")
+  if (fig>3) nqq.plot("r",temp.dset,paste0(y.clm," Error (Actual-Predicted)"),clr)
+
+  res=model.txt(glm.res)
+  
+  
+
   return(res)
   
 }
 
 
-###############################################
-# Generate narrative interpretation of a Cox model fit
+##########################################
+# Generate narrative results for a model
 
-coxph.txt=function(coxph.result)
+model.txt=function(model.result)
   
 {
-
-  cox.res=coxph.result
-  cox.tbl=coxph.tbl(cox.res)
-  res.terms=cox.res$terms
-  cox.terms=as.character(cox.res$terms)
-  y.cox=cox.terms[2]
-  x.cox=cox.terms[3]
-  x.cox=unlist(strsplit(x.cox,split=" + ",fixed=T))
   
-  res.txt=paste0("A Cox (1972) proportional hazards regression model was fit with ",
-                 text.list(x.cox)," as ",
-                 c("a predictor","predictors")[1+(length(x.cox)>1)]," of ",y.cox,".")
-  n.asgn=length(cox.res$assign)
-  for (i in 1:n.asgn)
+  coef.tbl=coef(summary(model.result))
+  CI.tbl=confint(model.result)
+  coef.names=rownames(coef.tbl)
+  
+  model.form=deparse(model.result$formula)
+  tilde.pos=regexpr(" ~ ",model.form,fixed=T)
+  y.var=substring(model.form,1,tilde.pos-1)
+  x.var=strsplit(substring(model.form,tilde.pos+3),split=" + ",fixed=T)
+  x.var=unlist(x.var)
+  
+  
+  res.terms=model.result$terms
+  term.labels=attr(res.terms,"term.labels")
+  term.classes=attr(res.terms,"dataClasses")
+  res.levels=model.result$xlevels
+  model.class=class(model.result)
+  
+  model.type=""
+  y.txt=""
+  ass.txt=NULL
+  res.txt=NULL
+  ref.grps=NULL
+  grp.txt=NULL
+  mth.txt=NULL
+  ref.txt=NULL
+  
+  
+
+  if (model.class[1]=="coxph")
   {
-    fctr=is.element(names(cox.res$assign)[i],
-                    names(cox.res$xlevels))
-    fctr.name=names(cox.res$assign)[i]
-    if (fctr)
+    CI.tbl=exp(CI.tbl)
+    res.tbl=cbind(HR=coef.tbl[,"exp(coef)"],
+                  LB95=CI.tbl[,1],
+                  UB95=CI.tbl[,2],
+                  p=coef.tbl[,"Pr(>|z|)"])
+    model.type="Cox"
+    y.txt=paste0("rate of ",y.var," events")
+    
+    zph.res=try(cox.zph(model.result,terms=F),silent=T)
+    if (class(zph.res)!="try-error")
     {
-      
-      fctr.lvls=cox.res$xlevels[[fctr.name]]
-      for (j in 2:length(fctr.lvls))
-      {
-        rw.nm=paste0(fctr.name,fctr.lvls[j])
-        term.txt=paste0("The fitted model estimates that ",
-                        fctr.name," group ",fctr.lvls[j]," subjects experience events ",
-                        "at a rate ",cox.tbl$HR.tbl[rw.nm,"HR"]," times that of ",
-                        fctr.name," group ",fctr.lvls[1]," subjects ",
-                        "(95% CI: ",cox.tbl$HR.tbl[rw.nm,"LB95"],
-                        ", ",cox.tbl$HR.tbl[rw.nm,"UB95"],"; p = ",
-                        cox.tbl$HR.tbl[rw.nm,"p"],").  ")
-        res.txt=c(res.txt,term.txt)
-      }
-      
-    } else
-    {
-      term.txt=paste0("The fitted model estimates that each one-unit increase in ",
-                      fctr.name," is associated with a change in the rate of events ",
-                      "by a factor of ",cox.tbl$HR.tbl[fctr.name,"HR"],
-                      " (95% CI: ",cox.tbl$HR.tbl[fctr.name,"LB95"],", ",
-                      cox.tbl$HR.tbl[fctr.name,"UB95"],"; p = ",
-                      cox.tbl$HR.tbl[fctr.name,"p"],").  ")
-      res.txt=c(res.txt,term.txt)
+      p.PHA=zph.res$table[,"p"]
+      global.PHA=zph.res$table["GLOBAL","p"]
+      p.PHA=p.PHA[rownames(res.tbl)]
+      res.tbl=cbind.data.frame(res.tbl,p.PHA=p.PHA)
+      ass.txt=paste0("The data ",c("do not ","")[1+(p.PHA<0.05)],
+                     "provide statistically compelling evidence that ",
+                     "the proportional hazards framework ",
+                     "inaccurately represents ",
+                     "the relationship of ",y.var," with ",
+                     names(p.PHA)," (p = ",p.PHA,").  ")
     }
+    ref.txt='Cox, David R (1972). "Regression Models and Life-Tables". Journal of the Royal Statistical Society, Series B. 34 (2): 187-220. JSTOR 2985181. MR 0341758.'
     
   }
   
-  for (i in 1:(nrow(cox.tbl$PH.tbl)-1))
+  
+  if ((model.class[1]=="glm"))
   {
-    term.txt=paste0("There is ",c("","not")[1+(cox.tbl$PH.tbl[i,"p"]>0.05)],
-                    " statistically compelling evidence that the mathematical form ",
-                    "of the model poorly represents the association of ",
-                    rownames(cox.tbl$PH.tbl)[i]," with ",y.cox," (p = ",
-                    cox.tbl$PH.tbl[i,"p"],").  ")
-    res.txt=c(res.txt,term.txt)
+    model.family=model.result$family$family
+    model.link=model.result$family$link
+    if ((model.family=="gaussian")&&(model.link=="identity"))
+    {
+      res.tbl=cbind(coef=coef.tbl[,"Estimate"],
+                    LB95=CI.tbl[,1],
+                    UB95=CI.tbl[,2],
+                    p=coef.tbl[,"Pr(>|t|)"])
+    }
+    model.type="linear"
+    y.txt=paste0("model's predicted value of ",y.var)
+    r=residuals(model.result)
+    sw.res=shapiro.test(r)
+    ass.txt=paste0("The data ",c("do not ","")[1+(sw.res$p.value<0.05)],"provide statistically compelling evidence that ",
+                   "the normal distribution inaccurately represents the distribution of the prediction errors",
+                   " (actual-predicted value) of this model (p = ",sw.res$p.value,").  ")
   }
   
-  term.txt=paste0("There is ",c("","not")[1+(cox.tbl$PH.tbl["GLOBAL","p"]>0.05)],
-                  " statistically compelling evidence that the mathematical form of ",
-                  "the model does not accurately represent the overall association of ",
-                  text.list(x.cox)," with ",y.cox," (p = ",cox.tbl$PH.tbl["GLOBAL","p"],").  ")
-  res.txt=c(res.txt,term.txt)
+
+
+  if (length(res.levels)>0)
+  {
+    for(i in 1:length(res.levels))
+    {
+      var.name=names(res.levels)[i]
+      lvl.names=res.levels[[i]]
+      cf.names=paste0(var.name,lvl.names[-1])
+      temp=cbind.data.frame(var.name=var.name,
+                            lvl.names=lvl.names[-1],
+                            ref.name=lvl.names[1],
+                            coef.name=cf.names)
+      ref.grps=rbind.data.frame(ref.grps,temp)
+    }
+    
+    
+    rownames(ref.grps)=ref.grps$coef.name
+    common.names=intersect(rownames(ref.grps),rownames(res.tbl))
+
+    # write narratives for categorical predictors
+    if (length(common.names)>0)
+    {
+      if (model.type=="Cox")
+      {
+        grp.txt=paste0("The model estimates that the ",y.txt," of the ",ref.grps[common.names,"lvl.names"]," ",
+                       ref.grps[common.names,"var.name"]," group is ",res.tbl[common.names,1],
+                       " times that of the ",ref.grps[common.names,"lvl.names"]," ",
+                       ref.grps[common.names,"ref.name"]," ",ref.grps[common.names,"var.name"]," group (95% CI: ",
+                       res.tbl[common.names,"LB95"],", ",res.tbl[common.names,"UB95"],
+                       "; p = ",res.tbl[common.names,"p"],".")
+        res.txt=c(res.txt,grp.txt)
+      }
+      
+      if (model.type=="linear")
+      {
+        grp.txt=paste0("The ",y.txt," for the ",ref.grps[common.names,"lvl.names"]," ",
+                       ref.grps[common.names,"var.name"]," group minus that for the ",
+                       ref.grps[common.names,"ref.name"],ref.grps[common.names,"lvl.names"]," group is ",
+                       res.tbl[common.names,1]," (95% CI: ",res.tbl[common.names,"LB95"],
+                       ", ",res.tbl[common.names,"UB95"],"; p = ",res.tbl[common.names,"p"],").  ")
+        res.txt=c(res.txt,grp.txt)
+      }
+    }
+  }
+    
+  # write narratives for numeric predictors
+  num.names=names(term.classes[term.classes=="numeric"])
+  print(num.names)
+  print(rownames(res.tbl))
+  num.names=intersect(rownames(res.tbl),num.names)
+  print(num.names)
+  if (length(num.names)>0)
+  {
+    if (model.type=="Cox")
+    {
+      num.txt=paste0("The model estimates that each unit increase of ",num.names,
+                     " associates with changing the ",y.txt," by a factor of ",
+                     res.tbl[num.names,1]," (95% CI: ",res.tbl[num.names,"LB95"],
+                     ", ",res.tbl[num.names,"UB95"],"; p = ",res.tbl[num.names,"p"],").  ")
+      res.txt=c(res.txt,num.txt)        
+    }
+    
+    if (model.type=="linear")
+    {
+      num.txt=paste0("For each unit increase of ",num.names, ", the ",
+                     y.txt," changes by ",res.tbl[num.names,1],
+                     " units (95% CI: ",res.tbl[num.names,"LB95"],
+                     ", ",res.tbl[num.names,"UB95"],"; p = ",
+                     res.tbl[num.names,"p"],").  ")
+      res.txt=c(res.txt,num.txt)
+    }
+
+  }
+    
+    
+
+    
+
   
+  mtd.txt=paste0("A ",model.type," regression model with ",
+                 text.list(x.var)," as ",c("a ","")[1+(length(x.var)>1)],
+                 "predictor",c("","s")[1+(length(x.var)>1)]," of ",y.var,
+                 " was fit to the data.")
+
   
-  method=paste0("A Cox (1972) proportional hazards regression model was fit with ",
-                text.list(x.cox)," as ",
-                c("a predictor","predictors")[1+(length(x.cox)>1)]," of ",y.cox,".")
+  res.txt=c(res.txt,ass.txt)
   
-  ref='Cox, David R (1972). "Regression Models and Life-Tables". Journal of the Royal Statistical Society, Series B. 34 (2): 187-220. JSTOR 2985181. MR 0341758.'
-  
-  res=list(tbl=cox.tbl,
+  res=list(tbl=res.tbl,
            txt=res.txt,
-           method=method,
-           ref=ref)
+           method=mtd.txt,
+           ref=ref.txt)
+  
+  class(res)="SBP.result"
   
   return(res)
+  
 }
+
 
 ####################################################
 # Create a table of coefficient estimates for a competing risk regression model
@@ -349,6 +451,33 @@ crr.tbl=function(crr.result)
                           UB95=smry$conf.int[,4],
                           p=smry$coef[,5])
   return(HR.tbl)
+}
+
+
+##########################################
+# Fit and evaluate a Cox
+
+fit.cox=function(form,data)
+  
+{
+  fit.res=coxph(form,data,y=T,x=T)
+  zph.res=cox.zph(fit.res,terms=F,global=F)
+  est.tbl=coef(summary(fit.res))
+  ci.tbl=confint(fit.res)
+  
+  HR.tbl=cbind.data.frame(predictor=rownames(est.tbl),
+                          HR=est.tbl[,2],
+                          LB95=exp(ci.tbl[,1]),
+                          UB95=exp(ci.tbl[,2]),
+                          p.HR1=est.tbl[,5],
+                          p.PHA=zph.res$table[,3])
+  zph.gbl=cox.zph(fit.res,global=T)
+  p.PHA.global=zph.gbl$table["GLOBAL",3]
+  
+  res=list(HR.tbl=HR.tbl,
+           p.PHA.global=p.PHA.global)
+  
+  return(res)
 }
 
 

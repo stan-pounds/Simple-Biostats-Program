@@ -39,6 +39,11 @@ read.data=function(file.name=NULL)
   if (file.type=="Rdata")
   {
     loaded.objects=try(load(file.name,verbose=T))
+    for (i in 1:length(loaded.objects)) 
+    {
+      R.code=paste0("try(View(",loaded.objects[i],"))")
+      eval(parse(text=R.code))
+    }
     alert("Successfully obtained ",loaded.objects," from ",basename(file.name),".")
     alert("Next time you may use the following R command:")
     alert('load("',R.file.name,'",verbose=T)')

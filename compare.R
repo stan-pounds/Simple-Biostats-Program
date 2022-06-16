@@ -424,9 +424,7 @@ compare.proportions=function(form,
   
   names(dimnames(full.tbl))=c(nm.grp,nm.cty)
   names(dimnames(avl.tbl))=c(nm.grp,nm.cty)
-  
-  cty.desc=describe.categorical(cty)
-  grp.desc=describe.categorical(grp)
+
   
   uniq.cty=unique(cty)
   clrs=define.colors(length(uniq.cty),clr)

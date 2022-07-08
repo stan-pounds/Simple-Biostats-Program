@@ -128,7 +128,7 @@ compare.events=function(form,
     ci.lty=lty[evt.names]
     
     
-    plot(ci.res,col=ci.clrs,lty=ci.lty,las=1,xlab="Time")
+    plot(ci.res,col=ci.clrs,lty=ci.lty,las=1,xlab="Time",lwd=2)
 
     res.txt=NULL
     for (i in 1:ncol(res.tbl))

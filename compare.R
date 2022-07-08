@@ -137,13 +137,13 @@ compare.events=function(form,
                      text.list(paste0(round(100*res.tbl[,i],2),"%")),
                      " of subjects in the ",grp.names[i]," population ",
                      "have experiened ",evt.names[i]," by times ",
-                    text.list(rownames(res.tbl)),", respectively.")
+                    text.list(rownames(res.tbl)),", respectively.  ")
       res.txt=c(res.txt,clm.txt)
     }
     
     for (i in 1:nrow(res.tbl2))
     {
-      row.txt=paste0("There is ",c("not","")[1+(res.tbl2[i,"pv"]>0.05)],
+      row.txt=paste0("There is ",c("not ","")[1+(res.tbl2[i,"pv"]<0.05)],
                      "statistically compelling evidence that the cumulative incidence of ",
                      rownames(res.tbl2)[i]," differs across the ",
                      text.list(uniq.grps)," populations (p = ",res.tbl2[i,"pv"],").  ")
@@ -160,7 +160,7 @@ compare.events=function(form,
     
     method=paste0("Gray's (1988) was used to estimate the cumulative incidence of ",
                   text.list(uniq.evnts)," and compare those estimates across the ",
-                  text.list(uniq.grps)," groups.")
+                  text.list(uniq.grps)," groups.  ")
     
     ref="Gray RJ (1988) A class of K-sample tests for comparing the cumulative incidence of a competing risk, ANNALS OF STATISTICS, 16:1141-1154"
     

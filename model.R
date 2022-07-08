@@ -95,12 +95,15 @@ model.events=function(form,data,
   if (class(y)=="competing.events")
   {
     mdl.frm=model.frame(form,data,na.action=na.omit)
+    mdl.terms=attr(mdl.frm,"terms")
+    term.class=attr(mdl.terms,"dataClasses")
+    
     form.str=deparse(form)
     tilde.pos=regexpr("~",form.str,fixed=T)
     xvar.str=substring(form.str,tilde.pos)
     xvar.form=eval(parse(text=xvar.str))
     mdl.mtx=model.matrix(xvar.form,data=mdl.frm)
-    print(head(mdl.mtx))
+    #print(head(mdl.mtx))
     x.clms=setdiff(colnames(mdl.mtx),"(Intercept)")
     x.mtx=matrix(mdl.mtx[,x.clms],ncol=length(x.clms))
     colnames(x.mtx)=x.clms
@@ -111,14 +114,54 @@ model.events=function(form,data,
     
     fnl.tbl=list(tbl.crr=tbl.crr)
     
+    ev.key=attr(y,"ev.key")
+
+    pr.event=ev.key[is.element(names(ev.key),1)]
+    cmp.events=ev.key[!is.element(names(ev.key),0:1)]
+
+    
+    txt.crr=NULL
+    num.terms=intersect(rownames(tbl.crr),
+                        names(term.class)[term.class=="numeric"])
+    if (length(num.terms)>0)
+    {
+      num.txt=paste0("The model estimates that the rate of ",pr.event," changes by a factor of ",
+                     tbl.crr[num.terms,"hazard.ratio"]," with each unit increase of ",
+                     num.terms," (95% CI: ",tbl.crr[num.terms,"LB95"],", ",tbl.crr[num.terms,"UB95"],
+                     "; p = ",tbl.crr[num.terms,"p"],").  ")
+      txt.crr=c(txt.crr,num.txt)
+    }
+    
+    fct.terms=names(term.class)[term.class=="factor"]
+    if (length(fct.terms)>0)
+    {
+      n.fct=length(fct.terms)
+      fct.txt=NULL
+      for (i in 1:n.fct)
+      {
+        lvls=levels(data[,fct.terms[i]])
+        tbl.rws=paste0(fct.terms[i],lvls[-1])
+        tbl.rws=intersect(tbl.rws,rownames(tbl.crr))
+        if (length(tbl.rws)>0)
+        {
+          row.txt=paste0("The model estimates that the ",fct.terms[i]," group ",gsub(fct.terms[i],"",tbl.rws),
+                         " experiences the primary ",y.clm," event ",pr.event," at ",
+                         tbl.crr[tbl.rws,"hazard.ratio"]," times the rate of the ",
+                         fct.terms[i]," group ",lvls[1],".  ")
+          fct.txt=c(fct.txt,row.txt)
+        }
+      }
+      txt.crr=c(txt.crr,fct.txt)
+    }
     
     if (fig>0)
     {
-      ev.key=attr(y,"ev.key")
+
       y.hat=predict(crr.res,x.mtx)
       y.hat.bar=colMeans(y.hat[,-1])
       grp=cut(y.hat.bar,c(-Inf,quantile(y.hat.bar,(1:2)/3,na.rm=T),Inf))
-      grp=c("low","int","high")[as.numeric(grp)]
+      grp=c("low","intermediate","high")[as.numeric(grp)]
+      grp=factor(grp,c("low","intermediate","high"))
       tm=mdl.frm[,y.clm][,1]
       ev=mdl.frm[,y.clm][,2]
       evnt=ev.key[as.character(ev)]
@@ -152,17 +195,49 @@ model.events=function(form,data,
       names(lty)=uniq.evnts
       ci.lty=lty[evt.names]
       
+      fig.txt=paste0("To describe the predictions of the model, the cohort was trichotomized into groups with ",text.list(sort(unique(grp))),
+                     " predicted rates of the primary ",y.clm," event ",pr.event,".  ",
+                     "The cumulative incidence of each ",y.clm," event (",text.list(ev.key[!is.element(names(ev.key),0)]),") was computed for those with ",
+                     text.list(sort(unique(grp)))," rates of the primary ",y.clm," event ",pr.event," according to ",
+                     "the fitted model.  ")
+      txt.crr=c(txt.crr,fig.txt)
+      
+      res.txt=NULL
+      for (i in 1:ncol(res.tbl))
+      {
+        clm.txt=paste0("Based on this data, it is estimated that ",
+                       text.list(paste0(round(100*res.tbl[,i],2),"%")),
+                       " of subjects in the group with an estimated ",grp.names[i],
+                       " rate of the primary ",y.clm," event ",pr.event, 
+                       " have experiened ",evt.names[i]," by times ",
+                       text.list(rownames(res.tbl)),", respectively.  ")
+        res.txt=c(res.txt,clm.txt)
+      }
+      
+      txt.crr=c(txt.crr,res.txt)
       
       plot(ci.res,col=ci.clrs,lty=ci.lty,las=1,xlab="Time")
       
       fnl.tbl=list(tbl.crr=tbl.crr,
                    tbl.cminc=res.tbl)
+      
+
+      
     }
     
+
     
+    
+    
+    mtd.str=paste0("A Fine-Gray (1999) proportional hazards model with ",text.list(form.vars$x.vars)," as predictor(s) of ",
+                   "the primary ",y.clm," event ", pr.event, " and adjusting for the ",y.clm, 
+                   " competing events ",text.list(cmp.events)," was fit to the data.")
+
     
     res=list(tbl=fnl.tbl,
-             txt="")
+             txt=txt.crr,
+             ref="Fine JP and Gray RJ (1999) A proportional hazards model for the subdistribution of a competing risk. JASA 94:496-509.",
+             method=mtd.str)
     
     return(res)
     
@@ -385,10 +460,10 @@ model.txt=function(model.result)
     
   # write narratives for numeric predictors
   num.names=names(term.classes[term.classes=="numeric"])
-  print(num.names)
-  print(rownames(res.tbl))
+  #print(num.names)
+  #print(rownames(res.tbl))
   num.names=intersect(rownames(res.tbl),num.names)
-  print(num.names)
+  #print(num.names)
   if (length(num.names)>0)
   {
     if (model.type=="Cox")

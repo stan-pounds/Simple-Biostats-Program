@@ -216,7 +216,7 @@ model.events=function(form,data,
       
       txt.crr=c(txt.crr,res.txt)
       
-      plot(ci.res,col=ci.clrs,lty=ci.lty,las=1,xlab="Time")
+      plot(ci.res,col=ci.clrs,lty=ci.lty,las=1,xlab="Time",lwd=2)
       
       fnl.tbl=list(tbl.crr=tbl.crr,
                    tbl.cminc=res.tbl)

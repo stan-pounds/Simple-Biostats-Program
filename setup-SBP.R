@@ -12,6 +12,7 @@ SBP.code.files=paste0(SBP.code.path,SBP.code.files)
 for (i in 1:length(SBP.code.files))
   source(SBP.code.files[i])
 
+get.package("DescTools")
 get.package("survival")
 get.package("cmprsk")
 get.package("penalized")

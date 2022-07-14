@@ -8,7 +8,8 @@ describe=function(clm.name,    # name of column in quotation marks
                   fig=1,       # figure output (0=none; 1=basic; 2 and higher = more)
                   txt=1,       # narrative output (0=none; 1=basic; 2=detailed)
                   clr=NULL,    # color(s) to use
-                  y.name=NULL) # name of x in quotation marks for narrative
+                  y.name=NULL, # name of x in quotation marks for narrative
+                  use.all=T)   # indicates whether to include all data regardless of missingness
   
 {
 
@@ -26,7 +27,7 @@ describe=function(clm.name,    # name of column in quotation marks
     res=describe.numeric(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=y.name)
   
   if(any(cls%in%c("character","factor","ordered")))
-    res=describe.categorical(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=y.name)
+    res=describe.categorical(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=y.name,use.all=use.all)
   
   if(any(cls%in%c("Surv","competing.events")))
     res=describe.event.timing(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=y.name)
@@ -205,7 +206,8 @@ describe.categorical=function(x,
                              fig=1,
                              txt=1,
                              clr=NULL,
-                             x.name=NULL)
+                             x.name=NULL,
+                             use.all=T)
 
 {
   ######################################
@@ -228,7 +230,15 @@ describe.categorical=function(x,
   # pick color scheme if not specified
   if (is.null(clr)) clr="rainbow"
   
-  res.tbl=table(x,exclude=NULL)
+  
+  all.tbl=table(x,exclude=NULL)
+  avl.tbl=table(x)
+  
+  n.miss=sum(all.tbl)-sum(avl.tbl)
+  
+  res.tbl=avl.tbl
+  if (use.all) res.tbl=all.tbl
+
   pct.tbl=100*res.tbl/sum(res.tbl)
   
   res.txt=""
@@ -239,8 +249,8 @@ describe.categorical=function(x,
   temp.dset=cbind.data.frame(x=x)
   if (fig>0)
   {
-    bar.plot("x",temp.dset,all=F,y.name=nmx,clr=clr)
-    if (fig>1) pie.plot("x",temp.dset,nmx,clr=clr)
+    bar.plot("x",temp.dset,y.name=nmx,clr=clr,all=use.all)
+    if (fig>1) pie.plot("x",temp.dset,nmx,clr=clr,all=use.all)
   }
 
 
@@ -269,6 +279,12 @@ describe.categorical=function(x,
     n.txt=paste0(n.txt,collapse=", ")
     n.txt=paste0(n.txt,".  ")
     res.txt=paste0(res.txt,n.txt)
+    
+    if ((!use.all)&(n.miss>0))
+      res.txt=c(res.txt,
+                paste0("This analysis ignores ",n.miss," missing data observations."))
+    
+    
   }
 
   

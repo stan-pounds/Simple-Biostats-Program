@@ -23,6 +23,15 @@ define.colors=function(n,
     }
   }
   
+  if (all(areColors(clr.palette)))
+  {
+    if (length(clr.names)>=n)
+    {
+      res=clr.palette[1:n]
+      return(res)
+    }
+  }
+  
   if (clr.palette%in%clr.funcs)
   {
     n.str=max(n,2)
@@ -102,4 +111,12 @@ show.colors=function()
     
     
   }
+}
+
+areColors <- function(x) 
+  {
+  sapply(x, function(X) {
+    tryCatch(is.matrix(col2rgb(X)), 
+             error = function(e) FALSE)
+  })
 }

@@ -48,7 +48,7 @@ resample=function(input,data.set,
              ylab="",
              main=paste0("Cohorts of ",r," Subjects"),
              las=1,cex.axis=1.25,cex.lab=1.25,
-             col=clrs[1],ylim=c(0,max(y.nml,hst$density)))
+             col=clrs[1],ylim=c(0,max(y.nml,hst$density,na.rm=T)))
         lines(x.nml,y.nml,col=clrs[2],lwd=2)
       }
     }
@@ -56,7 +56,12 @@ resample=function(input,data.set,
     if (class(y)%in%c("character","factor","ordered"))
     {
       desc.tbl=desc.result$tbl
-      rownames(desc.tbl)=desc.tbl[,1]
+      rw.names=desc.tbl[,1]
+      ok.rows=!is.element(rw.names,c("",NA,"NA"))
+      rw.names=rw.names[ok.rows]
+      desc.tbl=desc.tbl[ok.rows,]
+      
+      rownames(desc.tbl)=rw.names
       stat.names=desc.tbl[,1]
       rs.tbls=matrix(NA,b,length(stat.names))
       colnames(rs.tbls)=stat.names

@@ -21,7 +21,7 @@ describe=function(clm.name,    # name of column in quotation marks
   
   x=data[,clm.name]
   cls=class(x)
-  
+
   res=NULL
   if(any(cls%in%c("numeric","double","integer")))
     res=describe.numeric(x,tbl=tbl,fig=fig,txt=txt,clr=clr,x.name=y.name)
@@ -339,6 +339,7 @@ describe.numeric=function(x,            # variable to describe
 
   ######################################
   # descriptive statistics
+  shap.pval=as.numeric(try(shapiro.test(x)$p.value,silent=T))
   smry.stats=c(n.total=length(x),
             n.missing=sum(is.na(x)),
             n.available=sum(!is.na(x)),
@@ -349,7 +350,7 @@ describe.numeric=function(x,            # variable to describe
             upper.quartile=quantile(x,0.75,na.rm=T),
             minimum=min(x,na.rm=T),
             maximum=max(x,na.rm=T),
-            shapiro.pvalue=shapiro.test(x)$p.value)
+            shapiro.pvalue=shap.pval)
   names(smry.stats)=c("n.total","n.missing","n.available",
                       "mean","stdev","median",
                       "lower.quartile","upper.quartile",

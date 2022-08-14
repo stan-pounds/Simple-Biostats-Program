@@ -13,6 +13,8 @@ describe=function(clm.name,    # name of column in quotation marks
   
 {
 
+  data=data.frame(data)
+  
   if (is.null(y.name))
   {
     cll=deparse(match.call())

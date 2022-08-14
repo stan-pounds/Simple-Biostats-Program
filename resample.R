@@ -4,6 +4,7 @@ resample=function(input,data.set,
                   clr=c("royalblue","red"))
   
 {
+  data.set=data.frame(data.set)
   if (is.null(r)) r=nrow(data.set)
   
   desc.result=describe(input,data.set,fig=0,txt=0,tbl=1)
@@ -111,5 +112,17 @@ resample=function(input,data.set,
       
     }
 
-
+  res.txt=NULL
+  res.tbl=NULL
+  res.method=NULL
+  res.ref=NULL
+  
+  if (tbl>0) res.tbl=rs.tbls
+  res=list(txt=res.txt,
+           tbl=res.tbl,
+           method=res.method,
+           ref=res.ref)
+  
+  class(res)="SBP.result"
+  return(res)
 }

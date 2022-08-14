@@ -6,6 +6,7 @@
 box.plot=function(input,data,y.name=NULL,clr="rainbow")
   
 {
+  data=data.frame(data)
   if (is.character(input))
   {
     if (is.null(y.name)) y.name=input
@@ -57,6 +58,7 @@ box.plot=function(input,data,y.name=NULL,clr="rainbow")
 pie.plot=function(y.clm,data,y.name=NULL,all=F,clr=NULL)
   
 {
+  data=data.frame(data)
   x=data[,y.clm]
   
   avl.tbl=table(x)
@@ -94,6 +96,7 @@ pie.plot=function(y.clm,data,y.name=NULL,all=F,clr=NULL)
 bar.plot=function(y.clm,data,all=F,y.name=NULL,clr=NULL)
   
 {
+  data=data.frame(data)
   if (is.null(y.name)) y.name=y.clm
     
   x=data[,y.clm]
@@ -115,10 +118,10 @@ bar.plot=function(y.clm,data,all=F,y.name=NULL,clr=NULL)
     clrs=define.colors(length(res.tbl),clr)
     pct.tbl=100*res.tbl/sum(res.tbl)
     par.opts=par()
-    par(mar=c(6,12,4,2)+0.1)
+    par(mar=c(6,12,4,8)+0.1)
     bp.res=barplot(res.tbl,horiz=T,cex.names=1.5,
                    xlab=paste0(y.name," (n)"),col=clrs,las=1,
-                   cex.axis=1.25,cex.lab=1.5,xlim=c(0,1.2)*max(res.tbl),
+                   cex.axis=1.25,cex.lab=1.5,xlim=c(0,1.3)*max(res.tbl),
                    sub=sub.txt)
     text(res.tbl,bp.res,paste0("n = ",res.tbl,"\n (",round(pct.tbl,2)," %)"),cex=1,pos=4)
     par(mar=par.opts$mar)
@@ -144,6 +147,7 @@ bar.plot=function(y.clm,data,all=F,y.name=NULL,clr=NULL)
 nqq.plot=function(y.clm,data,y.name=NULL,clr="black")
   
 {
+  data=data.frame(data)
   if (is.null(y.name)) y.name=y.clm
   x=data[,y.clm]
   clrs=define.colors(1,clr)
@@ -163,6 +167,7 @@ nqq.plot=function(y.clm,data,y.name=NULL,clr="black")
 event.plot=function(input,data,y.name=NULL,clr=NULL)
   
 {
+  data=data.frame(data)
   if (class(input)=="character")
   {
     x=data[,input]
@@ -320,6 +325,7 @@ scatter.plot=function(form,data,
                       line=NA)
   
 {
+  data=data.frame(data)
   form.vars=get.vars(form)
   y.clm=form.vars$y.var
   x.clm=form.vars$x.var
@@ -387,6 +393,7 @@ mosaic.plot=function(form,data,clr="rainbow",
                      y.name=NULL,grp.name=NULL)
   
 {
+  data=data.frame(data)
   form.vars=get.vars(form)
   cty.clm=form.vars$y.var
   grp.clm=form.vars$x.var[1]

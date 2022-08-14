@@ -6,6 +6,7 @@ model=function(form,data,
                clr=NULL)
   
 {
+  data=data.frame(data)
   form.vars=get.vars(form)
   y.clm=form.vars$y.var
   y=data[,y.clm]

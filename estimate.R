@@ -15,6 +15,7 @@ estimate=function(clm.name,
                   x.name=NULL)
   
 {
+  data=data.frame(data)
   if(is.null(x.name))
   {
     cll=deparse(match.call())

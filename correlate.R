@@ -9,7 +9,7 @@ correlate=function(form,data,
                    line=1)
 
 {
-  
+  data=data.frame(data)
   form.vars=get.vars(form)
   
   y=data[,form.vars$y.var]

@@ -4,6 +4,7 @@ outliers=function(clm,dset,y.name=NULL,fig=1,txt=1,
                   clr=c("gray","red"))
   
 {
+  dset=data.frame(dset)
   x=dset[,clm]
   if (class(x)%in%c("numeric","double","integer"))
   {
@@ -30,9 +31,9 @@ outliers=function(clm,dset,y.name=NULL,fig=1,txt=1,
     }
     if (txt>0)
     {
-      fnl.txt=paste0("No values of ",y.name," met the boxplot or least trimmed squares definition of outlier.")
+      fnl.txt=paste0("No values of ",y.name," met the boxplot or least trimmed squares definition of outlier (Rousseeuw 1984).")
       if (sum(x.out)>0)
-      fnl.txt=paste0("Outlier(s) in ",y.name," by the boxplot or least trimmed squares definitions include ",
+      fnl.txt=paste0("Outlier(s) in ",y.name," by the boxplot or least trimmed squares (Rousseeuw 1984) definitions include ",
                      text.list(sort(unique(x[x.out]))),".  ")
     }
   

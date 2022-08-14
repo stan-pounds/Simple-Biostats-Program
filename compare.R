@@ -8,6 +8,8 @@ compare=function(form,data,
                  clr="rainbow")
   
 {
+  data=data.frame(data)
+  
   form.vars=get.vars(form)
   y.clm=form.vars$y.var
   y=data[,y.clm]

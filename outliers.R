@@ -5,12 +5,14 @@ outliers=function(clm,dset,y.name=NULL,fig=1,txt=1,
   
 {
   dset=data.frame(dset)
-  x=dset[,clm]
+  x=get.y.clm(clm,dset)
+  
+  if (is.null(y.name)) y.name=attr(x,"clm.name")
+  x.lbl=y.name
+  
   if (class(x)%in%c("numeric","double","integer"))
   {
-    if (is.null(y.name)) y.name=clm
-    x.lbl=y.name
-    
+
     na=is.na(x)
     bx.out=boxplot.stats(x)$out # boxplot definition of outliers
     
@@ -26,6 +28,7 @@ outliers=function(clm,dset,y.name=NULL,fig=1,txt=1,
     if (fig>0) 
     {
       y=jitter(rep(1,length(x)))
+      par(mar=rep(4,4))
       plot(x,y,cex=0.5,xlab=x.lbl,ylab="",yaxt="n",
            pch=19,col=x.clrs)
     }

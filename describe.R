@@ -14,15 +14,14 @@ describe=function(clm.name,    # name of column in quotation marks
 {
 
   data=data.frame(data)
+  x=get.y.clm(clm.name,data)
+  cls=class(x)
   
   if (is.null(y.name))
   {
-    cll=deparse(match.call())
-    y.name=get.arg(cll,"clm.name")
+    y.name=attr(x,"clm.name")
   }
-  
-  x=data[,clm.name]
-  cls=class(x)
+
 
   res=NULL
   if(any(cls%in%c("numeric","double","integer")))

@@ -16,12 +16,9 @@ estimate=function(clm.name,
   
 {
   data=data.frame(data)
-  if(is.null(x.name))
-  {
-    cll=deparse(match.call())
-    x.name=get.arg(cll,"clm.name")
-  }
-  x=data[,clm.name]
+  x=get.y.clm(clm.name,data)
+  if (is.null(x.name))
+    x.name=attr(x,"clm.name")
   res=estimate.pop.value(x,null,tbl,fig,txt,clr,x.name)
   return(res)
 }

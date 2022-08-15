@@ -1,18 +1,32 @@
 
+
+
 get.data.set=function(data.set)
 {
-  dset.name=arg.as.char(data.set)
-  print(dset.name)
-  
-  ls.res=ls(topenv())
-  print(ls.res)
+  temp=deparse(match.call())
+  dset.name=get.arg(temp,"data.set")
+  ls.res0=ls(topenv())
+  ls.res=ls.res
+
   mtch=grep(dset.name,ls.res)
-  print(mtch)
   if (length(mtch)==1)
   {
     res=eval(parse(text=dset.name))
+    res=data.frame(res)
     return(res)
   }
+  
+  print(dset.name)
+  mtch=agrep(dset.name,ls.res)
+  if (length(mtch)==1)
+  {
+    print(ls.res0[mtch])
+    res=eval(parse(text=ls.res0[mtch]))
+    res=data.frame(res)
+    return(res)
+  }
+  
+  stop(paste0("Unable to find data.set ",data.set,".  "))
 
 }
 
@@ -65,25 +79,42 @@ get.y.clm=function(y,dset)
 # Represent input argument as a character
 
 arg.as.char=function(x)
-  
 {
   temp=try(x,silent=T)
-  
-  if(class(temp)=="character") return(temp)
-  
-  if (class(temp)=="try-error")
-  {
-    mtch=regexpr(": object ",temp)
-    temp=substring(temp,mtch)
-    temp=gsub(": object ","",temp,fixed=T)
-    temp=gsub(" not found\n","",temp,fixed=T)
-    temp=gsub("'","",temp,fixed=T)
-    temp=as.character(temp)
+  if (class(temp)=="character")
     return(temp)
-  }
   
   temp=deparse(match.call())
-  temp=get.arg(temp,"x")
-  return(temp)
+  res=get.arg(temp,"x")
+  return(res)
+}
 
+#######################################
+# get the argument value
+
+
+get.arg=function(call.string, # obtain with deparse(match.call())
+                 arg.string)  # character string with argument name
+{
+  
+  x.pos=regexpr(paste0(arg.string," = "),call.string,fixed=T)
+  x.name=substring(call.string,x.pos+nchar(arg.string)+3)
+  x.name=x.name[x.pos>0]
+  
+  
+  comma.pos=regexpr(",",x.name,fixed=T)
+  close.pos=regexpr(")",x.name,fixed=T)
+  end.pos=close.pos
+  
+  if (length(comma.pos)>0)
+  {
+    if (comma.pos>0) end.pos=comma.pos
+  }
+  
+  x.name=substring(x.name,1,end.pos-1)
+  
+  
+  x.name=gsub('\"','',x.name)
+  
+  return(x.name)
 }

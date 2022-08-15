@@ -52,7 +52,7 @@ arg.as.char=function(x)
   
 {
   
-  if (class(temp)=="character")     return(x)
+  if (class(x)=="character") return(x)
 
 
   temp=try(x,silent=T)

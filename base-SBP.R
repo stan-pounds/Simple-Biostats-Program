@@ -1,4 +1,6 @@
 
+
+
 ###########################################
 # Extract a column of data from a data set
 
@@ -66,6 +68,7 @@ arg.as.char=function(x)
   }
   
   temp=deparse(temp)
+  temp=gsub('\"','',temp,fixed=T)
   return(temp)
 
 }

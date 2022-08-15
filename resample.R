@@ -7,19 +7,20 @@ resample=function(input,data.set,
   data.set=data.frame(data.set)
   if (is.null(r)) r=nrow(data.set)
   
-  desc.result=describe(input,data.set,fig=0,txt=0,tbl=1)
+  y=get.y.clm(input,data.set)
+  y.name=attr(y,"clm.name")
+  
+  desc.result=describe(y.name,data.set,fig=0,txt=0,tbl=1)
   n=nrow(data.set)
   indx=replicate(b,sample(n,r,T))
   tbls=vector("list",b)
-  y=data.set[,input]
+
   clrs=define.colors(2,clr)
   
-  if (is.character(input))
-  {
-    for (i in 1:b)
+  for (i in 1:b)
     {
       temp.data=data.set[indx[,i],]
-      temp.result=describe(input,temp.data,
+      temp.result=describe(y.name,temp.data,
                            tbl=1,fig=0,txt=0)
       tbls[[i]]=temp.result$tbl
     }
@@ -37,6 +38,7 @@ resample=function(input,data.set,
       
       if (fig>0)
       {
+        par(mar=rep(4,4))
         hst=hist(rs.tbls[,"mean"],plot=F)
         x.nml=seq(from=min(hst$breaks),to=max(hst$breaks),
                   length=101)
@@ -44,7 +46,7 @@ resample=function(input,data.set,
                     sd(rs.tbls[,"mean"]))
 
         hist(rs.tbls[,"mean"],freq=F,
-             xlab=paste0("Mean ",input," of ",
+             xlab=paste0("Mean ",y.name," of ",
                              r," Subjects"),
              ylab="",
              main=paste0("Cohorts of ",r," Subjects"),
@@ -108,9 +110,6 @@ resample=function(input,data.set,
 
         
       }
-
-      
-    }
 
   res.txt=NULL
   res.tbl=NULL

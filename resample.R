@@ -4,12 +4,20 @@ resample=function(input,data.set,
                   clr=c("royalblue","red"))
   
 {
+  
+  clm.name=try(input,silent=T)
+  if (class(clm.name)=="try-error")
+  {
+    temp=deparse(match.call())
+    clm.name=get.arg(temp,"input")
+  }
+
   data.set=data.frame(data.set)
   if (is.null(r)) r=nrow(data.set)
   
-  y=get.y.clm(input,data.set)
+  y=get.y.clm(clm.name,data.set)
   y.name=attr(y,"clm.name")
-  
+
   desc.result=describe(y.name,data.set,fig=0,txt=0,tbl=1)
   n=nrow(data.set)
   indx=replicate(b,sample(n,r,T))
@@ -18,12 +26,12 @@ resample=function(input,data.set,
   clrs=define.colors(2,clr)
   
   for (i in 1:b)
-    {
-      temp.data=data.set[indx[,i],]
-      temp.result=describe(y.name,temp.data,
-                           tbl=1,fig=0,txt=0)
-      tbls[[i]]=temp.result$tbl
-    }
+  {
+    temp.data=data.set[indx[,i],]
+    temp.result=describe(y.name,temp.data,
+                         tbl=1,fig=0,txt=0)
+    tbls[[i]]=temp.result$tbl
+  }
 
     if (class(y)%in%c("numeric","double","integer"))
     {
@@ -72,7 +80,8 @@ resample=function(input,data.set,
       {
         temp.stat=tbls[[i]][,"percent"]
         names(temp.stat)=tbls[[i]][,1]
-        rs.tbls[i,names(temp.stat)]=temp.stat
+        clm.names=intersect(names(temp.stat),stat.names)
+        rs.tbls[i,clm.names]=temp.stat[clm.names]
       }
       
       if (fig>0)
@@ -90,7 +99,7 @@ resample=function(input,data.set,
           y=dbinom(x,r,desc.tbl[stat.names[i],"percent"]/100)/(100/r)
 
           
-
+          par(mar=rep(4,4))
           hst=hist(rs.tbls[,stat.names[i]],freq=F,
                    breaks=100*brks/r,
                    xlab=paste0("% ",stat.names[i]," among ",

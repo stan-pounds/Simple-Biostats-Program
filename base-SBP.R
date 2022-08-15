@@ -37,9 +37,10 @@ get.data.set=function(data.set)
 get.y.clm=function(y,dset)
   
 {
+  y.clm=arg.as.char(y)
   dset.clms=colnames(dset)
   clms=colnames(dset)
-  y.clm=arg.as.char(y)
+  
   
   mtch=which(is.element(clms,y.clm))
   if (length(mtch)==1)

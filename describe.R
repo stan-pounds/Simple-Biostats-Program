@@ -12,6 +12,12 @@ describe=function(clm.name,    # name of column in quotation marks
                   use.all=T)   # indicates whether to include all data regardless of missingness
   
 {
+  try.clm=try(clm.name,silent=T)
+  if (class(try.clm)=="try-error")
+  {
+    temp=deparse(match.call())
+    clm.name=get.arg(temp,"clm.name")
+  }
 
   data=data.frame(data)
   x=get.y.clm(clm.name,data)
@@ -467,30 +473,3 @@ text.list=function(x)
   return(paste0(paste0(x[-n],collapse=", ")," and ",x[n]))
 }
 
-#######################################
-# get the argument value
-
-
-get.arg=function(call.string, # obtain with deparse(match.call())
-                 arg.string)  # character string with argument name
-{
-
-  x.pos=regexpr(paste0(arg.string," = "),call.string,fixed=T)
-  x.name=substring(call.string,x.pos+nchar(arg.string)+3)
-  x.name=x.name[x.pos>0]
-
-  
-  comma.pos=regexpr(",",x.name,fixed=T)
-  close.pos=regexpr(")",x.name,fixed=T)
-  
-
-  
-  end.pos=close.pos
-  if (comma.pos>0) end.pos=comma.pos
-  x.name=substring(x.name,1,end.pos-1)
-  
-
-  x.name=gsub('\"','',x.name)
-  
-  return(x.name)
-}

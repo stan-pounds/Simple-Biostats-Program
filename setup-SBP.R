@@ -6,7 +6,7 @@ SBP.code.files=c("get-packages.R",
                "describe.R","estimate.R","correlate.R",
                "compare.R","model.R","colors.R",
                "print.R","figures.R","read-data.R",
-               "outliers.R","resample.R")
+               "outliers.R","resample.R","base-SBP.R")
 
 SBP.code.files=paste0(SBP.code.path,SBP.code.files)
 

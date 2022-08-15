@@ -578,7 +578,14 @@ model.txt=function(model.result)
                  " was fit to the data.")
 
   
-  res.txt=c(res.txt,ass.txt)
+  if (model.type=="linear")
+  {
+    rsq.value=rsq(model.result)
+    rsq.txt=paste0("This model empirically accounts for ",
+                   round(100*rsq.value,2),"% of the variability in ",y.var,".  ")
+  }
+  
+  res.txt=c(res.txt,rsq.txt,ass.txt)
   
   res=list(tbl=res.tbl,
            txt=res.txt,

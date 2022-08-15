@@ -1,4 +1,20 @@
 
+get.data.set=function(data.set)
+{
+  dset.name=arg.as.char(data.set)
+  print(dset.name)
+  
+  ls.res=ls(topenv())
+  print(ls.res)
+  mtch=grep(dset.name,ls.res)
+  print(mtch)
+  if (length(mtch)==1)
+  {
+    res=eval(parse(text=dset.name))
+    return(res)
+  }
+
+}
 
 
 ###########################################
@@ -51,11 +67,10 @@ get.y.clm=function(y,dset)
 arg.as.char=function(x)
   
 {
-  
-  if (class(x)=="character") return(x)
-
-
   temp=try(x,silent=T)
+  
+  if(class(temp)=="character") return(temp)
+  
   if (class(temp)=="try-error")
   {
     mtch=regexpr(": object ",temp)
@@ -67,8 +82,8 @@ arg.as.char=function(x)
     return(temp)
   }
   
-  temp=deparse(temp)
-  temp=gsub('\"','',temp,fixed=T)
+  temp=deparse(match.call())
+  temp=get.arg(temp,"x")
   return(temp)
 
 }

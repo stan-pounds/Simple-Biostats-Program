@@ -20,7 +20,7 @@ model=function(form,data,
   if (class(y)%in%c("numeric","double","integer"))
   {
     y.binary=all(is.element(y,c(0:1,NA)))
-    if (is.null(clr)) clr="black"
+    if (is.null(clr)) clr=c("black","red")
     if (y.binary)
     {
       message(paste0("R is modeling Pr(",y.clm," = 1)."))
@@ -279,7 +279,7 @@ model.binary=function(form,data,
 
 model.numeric=function(form,data,
                        tbl=1,fig=3,txt=1,
-                       clr="black")
+                       clr=c("black","red"))
   
 {
   form.vars=get.vars(form)
@@ -297,9 +297,9 @@ model.numeric=function(form,data,
     }
   }
   
-  
-  
-  glm.res=glm(formula=form,data=data)
+  clrs=define.colors(2,clr)
+
+  glm.res=glm(formula=form,data=data,x=T,y=T)
   res.tbl=glm.tbl(glm.res)
   
   r=residuals(glm.res)
@@ -311,14 +311,93 @@ model.numeric=function(form,data,
   
   temp.dset=cbind.data.frame(y=y.obs,y.hat=y.hat,r=r)
   
-  if (fig>0) scatter.plot(y~y.hat,temp.dset,clr,line=1,
-                          x.name=paste0("Model Prediction of ",y.clm),
-                          y.name=paste0("Observed Value of ",y.clm))
-  if (fig>1) scatter.plot(r~y.hat,temp.dset,line=0,
-                          x.name=paste0("Model Prediction of ",y.clm),
-                          y.name=paste0(y.clm," Error (Actual-Predicted)"))
-  if (fig>2) bar.plot("r",temp.dset,paste0(y.clm," Error (Actual-Predicted)"),clr="gray")
-  if (fig>3) nqq.plot("r",temp.dset,paste0(y.clm," Error (Actual-Predicted)"),clr)
+  if (nrow(res.tbl)==2)
+    temp.dset$x=glm.res$x[,2]
+  
+  if (fig>0)
+  {
+    if (nrow(res.tbl)==2)
+    {
+      scatter.plot(y~x,temp.dset,clrs,line=1,
+                   x.name=x.clm,y.name=y.clm,txt=1)
+    }
+    
+    if (nrow(res.tbl)>2)
+    scatter.plot(y~y.hat,temp.dset,clrs,line=1,
+                 x.name=paste0("Model Prediction of ",y.clm),
+                 y.name=paste0("Observed Value of ",y.clm),txt=1)
+    
+  }
+    
+
+  if (fig>1) 
+  {
+    if(nrow(res.tbl)==2)
+    {
+      scatter.plot(r~x,temp.dset,clrs,line=1,
+                   x.name=x.clm,y.name=paste0(y.clm," Error (Actual-Predicted"))
+    }
+    
+    if (nrow(res.tbl)>2)
+    {
+      scatter.plot(r~y.hat,temp.dset,line=0,
+                   x.name=paste0("Model Prediction of ",y.clm),
+                   y.name=paste0(y.clm," Error (Actual-Predicted)"))
+    }
+  }
+  
+  
+  if (fig>2)
+  {
+    if (nrow(res.tbl)==2)
+    {
+      scatter.plot(y~x,temp.dset,clrs,line=1,
+                   x.name=x.clm,y.name=y.clm,txt=1)
+      
+      segments(temp.dset$x,
+               temp.dset$y,
+               temp.dset$x,
+               temp.dset$y.hat,
+               col=clrs[2])
+      
+      scatter.plot(r~x,temp.dset,clrs,line=1,
+                   x.name=x.clm,y.name=paste0(y.clm," Error (Actual-Predicted"))
+      
+      segments(temp.dset$x,0,
+               temp.dset$x,
+               temp.dset$r,
+               col=clrs[2])
+      
+    }
+    
+    if (nrow(res.tbl)>2)
+    {
+      scatter.plot(y~y.hat,temp.dset,clr,line=1,
+                   x.name=paste0("Model Prediction of ",y.clm),
+                   y.name=paste0("Observed Value of ",y.clm),txt=1)
+      
+      segments(temp.dset$y.hat,
+               temp.dset$y.hat,
+               temp.dset$y.hat,
+               temp.dset$y,
+               col=clrs[2])
+      
+      scatter.plot(r~y.hat,temp.dset,line=0,
+                   x.name=paste0("Model Prediction of ",y.clm),
+                   y.name=paste0(y.clm," Error (Actual-Predicted)"))
+      
+      segments(temp.dset$y.hat,0,
+               temp.dset$y.hat,
+               temp.dset$r,
+               col=clrs[2])
+      
+      
+    }
+
+  }
+
+  if (fig>3) bar.plot("r",temp.dset,paste0(y.clm," Error (Actual-Predicted)"),clr=clrs[2])
+  if (fig>4) nqq.plot("r",temp.dset,paste0(y.clm," Error (Actual-Predicted)"),clr)
 
   res=model.txt(glm.res)
   

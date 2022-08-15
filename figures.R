@@ -322,7 +322,7 @@ scatter.plot=function(form,data,
                       clr="black",
                       x.name=NULL,
                       y.name=NULL,
-                      line=NA)
+                      line=NA,txt=0)
   
 {
   data=data.frame(data)
@@ -355,7 +355,7 @@ scatter.plot=function(form,data,
   
   sub.txt=""
   
-  if (line%in%1)
+  if ((line%in%1)&&(txt>0))
   sub.txt=paste0(corr.method," r = ",round(corr.stat,3),
                  "; p = ",corr.pvalue)
   

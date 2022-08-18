@@ -299,8 +299,11 @@ model.numeric=function(form,data,
   
   clrs=define.colors(2,clr)
 
+  print(class(data))
   glm.res=glm(formula=form,data=data,x=T,y=T)
+  print("GLM Done")
   res.tbl=glm.tbl(glm.res)
+  print("glm.tbl Done")
   
   r=residuals(glm.res)
   r.sw=shapiro.test(r)
@@ -318,6 +321,7 @@ model.numeric=function(form,data,
   {
     if (nrow(res.tbl)==2)
     {
+      print(class(temp.dset))
       scatter.plot(y~x,temp.dset,clrs,line=1,
                    x.name=x.clm,y.name=y.clm,txt=1)
     }
@@ -580,7 +584,7 @@ model.txt=function(model.result)
   
   if (model.type=="linear")
   {
-    rsq.value=rsq(model.result)
+    rsq.value=1-sum(residuals(model.result)^2)/sum((model.result$y-mean(model.result$y,na.rm=T))^2,na.rm=T)
     rsq.txt=paste0("This model empirically accounts for ",
                    round(100*rsq.value,2),"% of the variability in ",y.var,".  ")
   }

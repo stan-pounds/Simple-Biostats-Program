@@ -336,6 +336,7 @@ scatter.plot=function(form,data,
   if(is.null(x.name)) x.name=x.clm
   if(is.null(y.name)) y.name=y.clm
   
+  print("Starting LM within scatter.plot")
   lm.fit=lm(y~x)
   r=residuals(lm.fit)
   sw.res=shapiro.test(r)
@@ -360,6 +361,8 @@ scatter.plot=function(form,data,
                  "; p = ",corr.pvalue)
   
   clrs=define.colors(1,clr)
+  par.opts=par()
+  par(mar=c(6,6,6,2))
   plot(x,y,xlab=x.name,ylab=y.name,
        main="",cex.axis=1.5,cex.lab=1.5,
        col=clrs,sub=sub.txt)
@@ -383,6 +386,7 @@ scatter.plot=function(form,data,
     y.mn=mean(y)
     abline(y.mn,0,col=clrs)
   }
+  par(mar=par.opts$mar)
   
 }
 

@@ -117,10 +117,23 @@ describe.event.timing=function(x,
     
     ref='Kaplan, E. L.; Meier, P. (1958). "Nonparametric estimation from incomplete observations". J. Amer. Statist. Assoc. 53 (282): 457-481. doi:10.2307/2281868. JSTOR 2281868.'
     
-    fnl.tbl=cbind.data.frame(time=res.tbl$time,
-                             n.risk=res.tbl$n.risk,
-                             n.event=res.tbl$n.event,
-                             surv=res.tbl$surv)
+    fnl.tbl=NULL
+    
+    if (tbl>0)
+    {
+      fnl.tbl=cbind.data.frame(time=res.tbl$time,
+                               n.risk=res.tbl$n.risk,
+                               n.event=res.tbl$n.event,
+                               surv=res.tbl$surv)
+    }
+    if (tbl>1)
+    {
+      fnl.tbl$std.err=res.tbl$std.err
+      fnl.tbl$CILB=res.tbl$lower
+      fnl.tbl$CIUB=res.tbl$upper
+    }
+    
+
     
     res=list(tbl=fnl.tbl,
              txt=res.txt,

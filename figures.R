@@ -186,9 +186,9 @@ event.plot=function(input,data,y.name=NULL,clr=NULL)
       km=survfit(x~1)
       
       ylbl=paste0("Pr(",y.name,")")
-      plot(km,las=1,conf.int=F,mark.time=T,lwd=2,
+      plot(km,las=1,conf.int=T,mark.time=T,lwd=2,
            cex.axis=1.5,cex.lab=1.5,ylab=ylbl,
-           xlab="Time",col=clr)
+           xlab="Time",col=clr,conf.type="log-log")
     }
     
     if (cls=="competing.events")

@@ -246,7 +246,6 @@ model.events=function(form,data,
 }
 
 
-
 model.binary=function(form,data,
                       tbl=1,fig=3,txt=1,
                       clr="rainbow")
@@ -306,7 +305,7 @@ model.numeric=function(form,data,
   print("glm.tbl Done")
   
   r=residuals(glm.res)
-  r.sw=shapiro.test(r)
+  r.sw=normality.test(r)
   y.hat=predict(glm.res)
   y.obs=glm.res$y
   
@@ -444,6 +443,7 @@ model.txt=function(model.result)
   grp.txt=NULL
   mth.txt=NULL
   ref.txt=NULL
+  ass.mthd=NULL
   
   
 
@@ -490,10 +490,22 @@ model.txt=function(model.result)
     model.type="linear"
     y.txt=paste0("model's predicted value of ",y.var)
     r=residuals(model.result)
-    sw.res=shapiro.test(r)
+    sw.res=normality.test(r)
     ass.txt=paste0("The data ",c("do not ","")[1+(sw.res$p.value<0.05)],"provide statistically compelling evidence that ",
                    "the normal distribution inaccurately represents the distribution of the prediction errors",
                    " (actual-predicted value) of this model (p = ",sw.res$p.value,").  ")
+    
+    ass.mthd=paste0("The ",sw.res$method," was used to formally evaluate the normality of the ",
+                    "prediction errors (actual-predicted value) of the model.")
+    
+    if (grepl("Shapiro",sw.res$method))
+    {
+      ref.txt='Shapiro, S. S.; Wilk, M. B. (1965). "An analysis of variance test for normality (complete samples)". Biometrika. 52 (3–4): 591–611. doi:10.1093/biomet/52.3-4.591'
+    }
+    if (grepl("Kolmogorov",sw.res$method))
+    {
+      ref.txt="George Marsaglia, Wai Wan Tsang and Jingbo Wang (2003). Evaluating Kolmogorov's distribution. Journal of Statistical Software, 8/18. doi:10.18637/jss.v008.i18."
+    }
   }
   
 
@@ -579,9 +591,10 @@ model.txt=function(model.result)
   mtd.txt=paste0("A ",model.type," regression model with ",
                  text.list(x.var)," as ",c("a ","")[1+(length(x.var)>1)],
                  "predictor",c("","s")[1+(length(x.var)>1)]," of ",y.var,
-                 " was fit to the data.")
+                 " was fit to the data.  ")
+  mtd.txt=c(mtd.txt,ass.mthd)
 
-  
+  rsq.txt=NULL
   if (model.type=="linear")
   {
     rsq.value=1-sum(residuals(model.result)^2)/sum((model.result$y-mean(model.result$y,na.rm=T))^2,na.rm=T)

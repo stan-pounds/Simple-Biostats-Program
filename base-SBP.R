@@ -1,4 +1,5 @@
-
+#################################################
+# get a data set
 
 
 get.data.set=function(data.set)
@@ -118,4 +119,25 @@ get.arg=function(call.string, # obtain with deparse(match.call())
   x.name=gsub('\"','',x.name)
   
   return(x.name)
+}
+
+
+###################################
+# Normality test
+# perform shapiro.test if n < 3000
+# otherwise perform ks.test
+
+normality.test=function(x)
+{
+  na=is.na(x)
+  n=length(x)
+  
+  if (n<3000)
+  {
+    res=shapiro.test(x)
+    return(res)
+  }
+  
+  res=ks.test(x,"pnorm")
+  return(res)
 }

@@ -413,8 +413,8 @@ describe.numeric=function(x,            # variable to describe
   if (txt>1)
   {
     more.txt=paste0("The distribution of ",nmx,
-                    c(" differs "," does not differ ")[1+(smry.stats["shapiro.pvalue"]>0.05)],
-                    "significantly from a normal distribution at the 0.05 level (Shapiro-Wilk p = ",smry.stats["shapiro.pvalue"],").  ")
+                    c(" differs "," does not differ ")[1+(smry.stats["normality.pvalue"]>0.05)],
+                    "significantly from a normal distribution at the 0.05 level (p = ",smry.stats["normality.pvalue"],").  ")
     res.txt=c(res.txt,more.txt)
   }
   

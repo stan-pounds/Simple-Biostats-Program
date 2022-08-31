@@ -255,7 +255,6 @@ model.binary=function(form,data,
   res.tbl=glm.tbl(glm.res)
   
   r=residuals(glm.res)
-  r.sw=shapiro.test(r)
   y.hat=predict(glm.res)
   p.hat=exp(y.hat)/(1+exp(y.hat))
   y.obs=glm.res$y
@@ -714,4 +713,27 @@ glm.tbl=function(glm.result)
     return(res.tbl)
   }
 
+}
+
+###########################################
+# Linear Regression on Ranks Model 
+# Iman and Conover (1979) The use of the rank transform in regression.  Technometrics 21:499-509.
+
+monotone.rank.model=function(x,y)
+{
+  na=is.na(x)|is.na(y)
+  x=x[!na]
+  y=y[!na]
+  n=length(x)
+  rx=rank(x)
+  ry=rank(y)
+  k=n*(n+1)^2/4
+  b=(sum(rx*ry)-k)/(sum(rx^2)-k)
+  a=(1-b)*(n+1)/2
+  ry.hat=a+b*rx
+  y.hat=ry.hat
+  ord.y=order(y)
+  y.hat[ord.y]=approx(ry[ord.y],y[ord.y],xout=ry.hat[ord.y])$y
+  res=cbind.data.frame(x=x,y=y,y.hat=y.hat)
+  return(res)
 }

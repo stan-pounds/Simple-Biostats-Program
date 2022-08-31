@@ -359,7 +359,7 @@ describe.numeric=function(x,            # variable to describe
 
   ######################################
   # descriptive statistics
-  shap.pval=as.numeric(try(shapiro.test(x)$p.value,silent=T))
+  nml.test=normality.test(x)
   smry.stats=c(n.total=length(x),
             n.missing=sum(is.na(x)),
             n.available=sum(!is.na(x)),
@@ -370,11 +370,11 @@ describe.numeric=function(x,            # variable to describe
             upper.quartile=quantile(x,0.75,na.rm=T),
             minimum=min(x,na.rm=T),
             maximum=max(x,na.rm=T),
-            shapiro.pvalue=shap.pval)
+            normality.pvalue=nml.test$p.value)
   names(smry.stats)=c("n.total","n.missing","n.available",
                       "mean","stdev","median",
                       "lower.quartile","upper.quartile",
-                      "minimum","maximum","shapiro.pvalue")
+                      "minimum","maximum","normality.pvalue")
   
   ######################################
   # tables
@@ -420,9 +420,14 @@ describe.numeric=function(x,            # variable to describe
   
   if (txt>0) res.txt=paste0(res.txt,collapse="")
   
-  method=paste0("The Shapiro-Wilk (1965) test was used to evaluate the normality of the distribution of ",nmx,".  ")
+  method=paste0("The ",nml.test$method ," was used to evaluate the normality of the distribution of ",nmx,".  ")
   
-  ref='Shapiro, S. S.; Wilk, M. B. (1965). "An analysis of variance test for normality (complete samples)". Biometrika. 52 (3-4): 591-611. doi:10.1093/biomet/52.3-4.591. JSTOR 2333709. MR 0205384.'
+  ref=NULL
+  if (grepl("Shapiro",nml.test$method))
+    ref='Shapiro, S. S.; Wilk, M. B. (1965). "An analysis of variance test for normality (complete samples)". Biometrika. 52 (3-4): 591-611. doi:10.1093/biomet/52.3-4.591. JSTOR 2333709. MR 0205384.'
+  
+  if (grepl("Smirnov",nml.test$method))
+    ref="George Marsaglia, Wai Wan Tsang and Jingbo Wang (2003). Evaluating Kolmogorov's distribution. Journal of Statistical Software, 8/18. doi:10.18637/jss.v008.i18."
   
 
   

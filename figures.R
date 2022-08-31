@@ -339,7 +339,7 @@ scatter.plot=function(form,data,
   print("Starting LM within scatter.plot")
   lm.fit=lm(y~x)
   r=residuals(lm.fit)
-  sw.res=shapiro.test(r)
+  sw.res=normality.test(r)
   sw.sig=(sw.res$p.value<=0.05)
   
   ry=rank(y)

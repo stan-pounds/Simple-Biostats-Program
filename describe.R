@@ -61,7 +61,7 @@ describe.event.timing=function(x,
   ######################################
   # check for proper input
   cls=class(x)
-  if (!(cls[1]%in%c("Surv","competing.events")))
+  if (!(any(cls%in%c("Surv","competing.events"))))
     stop("x must be of class Surv or competing.events.")
   
   
@@ -75,7 +75,7 @@ describe.event.timing=function(x,
 
   
   # Kaplan-Meier curves
-  if(cls=="Surv")
+  if(any(cls%in%"Surv"))
   {
     km=survfit(x~1)
     
@@ -147,7 +147,7 @@ describe.event.timing=function(x,
   }
   
   
-  if (cls=="competing.events")
+  if (any(cls%in%"competing.events"))
   {
     # Compute Cumulative Incidence Curve
     evnt.types=unique(x[,2])
@@ -473,7 +473,7 @@ competing.event.time=function(obs.time,
   }
   
   attr(res,"ev.key")=ev.key
-  class(res)="competing.events"
+  class(res)=c("matrix","competing.events")
   return(res)
 }
 

@@ -168,6 +168,9 @@ event.plot=function(input,data,y.name=NULL,clr=NULL)
   
 {
   data=data.frame(data)
+  # if nmx not provided then extract it from the input
+  if (is.null(y.name)) y.name=input
+  
   if (class(input)=="character")
   {
     x=data[,input]
@@ -176,8 +179,7 @@ event.plot=function(input,data,y.name=NULL,clr=NULL)
       stop("x must be of class Surv or competing.events.")
     
     
-    # if nmx not provided then extract it from the input
-    if (is.null(y.name)) y.name=input
+
     
     # Kaplan-Meier curves
     if(cls=="Surv")
@@ -237,7 +239,7 @@ event.plot=function(input,data,y.name=NULL,clr=NULL)
       par(mar=c(6,6,1,1))
       plot(sfit,col=clrs,lwd=2,las=1,
            xlab=paste0("Time"),
-           ylab=y.clm,xlim=xlim,
+           ylab=y.name,xlim=xlim,
            cex.axis=1.5,cex.lab=1.5)
       if (length(sfit$strata)>1)
       {
@@ -319,7 +321,7 @@ event.plot=function(input,data,y.name=NULL,clr=NULL)
 # 
 
 scatter.plot=function(form,data,
-                      clr="black",
+                      clr=c("black","red"),
                       x.name=NULL,
                       y.name=NULL,
                       line=NA,txt=0)
@@ -336,7 +338,6 @@ scatter.plot=function(form,data,
   if(is.null(x.name)) x.name=x.clm
   if(is.null(y.name)) y.name=y.clm
   
-  print("Starting LM within scatter.plot")
   lm.fit=lm(y~x)
   r=residuals(lm.fit)
   sw.res=normality.test(r)
@@ -360,12 +361,12 @@ scatter.plot=function(form,data,
   sub.txt=paste0(corr.method," r = ",round(corr.stat,3),
                  "; p = ",corr.pvalue)
   
-  clrs=define.colors(1,clr)
+  clrs=define.colors(1+(!is.na(line)),clr)
   par.opts=par()
   par(mar=c(6,6,6,2))
   plot(x,y,xlab=x.name,ylab=y.name,
        main="",cex.axis=1.5,cex.lab=1.5,
-       col=clrs,sub=sub.txt)
+       col=clrs[1],sub=sub.txt)
   
   if (line%in%1)
   {
@@ -373,10 +374,9 @@ scatter.plot=function(form,data,
     if (!sw.sig) abline(lm.fit,col=clrs)
     if (sw.sig)
     {
-      y.hat=approx(ry,y,xout=rr.fit$fitted.values)$y
-      x.plt=approx(rx,x,xout=rr.fit$x[,"rx"])$y
-      ord=order(x.plt)
-      lines(x.plt[ord],y.hat[ord],col=clrs)
+      mrm.res=monotone.rank.model(x,y)
+      mrmx.ord=order(mrm.res$x)
+      lines(mrm.res$x[mrmx.ord],mrm.res$y.hat[mrmx.ord],col=clrs[2])
     }
     
   }
@@ -384,7 +384,7 @@ scatter.plot=function(form,data,
   if (line%in%0)
   {
     y.mn=mean(y)
-    abline(y.mn,0,col=clrs)
+    abline(y.mn,0,col=clrs[2])
   }
   par(mar=par.opts$mar)
   

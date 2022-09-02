@@ -82,7 +82,7 @@ model.events=function(form,data,
       grp=cut(y.hat,c(-Inf,quantile(y.hat,(1:2)/3,na.rm=T),Inf))
       srv=cox.res$y
       temp.dset=cbind.data.frame(srv,grp,y.hat)
-      event.plot(srv~y.hat,temp.dset,clr=clr)
+      event.plot(srv~grp,temp.dset,clr=clr,y.name=y.clm)
     }
     
     res=model.txt(cox.res)

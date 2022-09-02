@@ -52,7 +52,7 @@ compare.events=function(form,
   form.vars=get.vars(form)
   y.clm=form.vars$y.var
   y=data[,y.clm]
-  y.cls=class(y)[1]
+  y.cls=class(y)
   
   grp.clm=form.vars$x.var
 
@@ -60,7 +60,7 @@ compare.events=function(form,
   if (is.null(name.y)) name.y=y.clm
   if (is.null(name.grp)) name.grp=grp.clm
     
-  if (y.cls=="Surv")
+  if (any(y.cls=="Surv"))
   {
     sfit=survfit(form,data=data)
     log.rank=survdiff(form,data)
@@ -97,7 +97,7 @@ compare.events=function(form,
     return(res)
   }
   
-  if (y.cls=="competing.events")
+  if (any(y.cls=="competing.events"))
   {
     grp.clm=form.vars$x.var
     grp=data[,grp.clm]

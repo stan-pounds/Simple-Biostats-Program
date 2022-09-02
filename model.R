@@ -54,7 +54,7 @@ model=function(form,data,
     return(res)
   }
   
-
+  
 }
 
 
@@ -73,7 +73,7 @@ model.events=function(form,data,
   {
     cox.res=coxph(form,data)
     cox.tbl=fit.cox(form,data)
-    #txtres=coxph.txt(cox.res)
+    txtres=model.txt(cox.res)
     y.hat=cox.res$linear.predictors
     
     
@@ -92,7 +92,7 @@ model.events=function(form,data,
     return(res)
   }
   
-
+  
   if (class(y)=="competing.events")
   {
     mdl.frm=model.frame(form,data,na.action=na.omit)
@@ -116,10 +116,10 @@ model.events=function(form,data,
     fnl.tbl=list(tbl.crr=tbl.crr)
     
     ev.key=attr(y,"ev.key")
-
+    
     pr.event=ev.key[is.element(names(ev.key),1)]
     cmp.events=ev.key[!is.element(names(ev.key),0:1)]
-
+    
     
     txt.crr=NULL
     num.terms=intersect(rownames(tbl.crr),
@@ -157,7 +157,7 @@ model.events=function(form,data,
     
     if (fig>0)
     {
-
+      
       y.hat=predict(crr.res,x.mtx)
       y.hat.bar=colMeans(y.hat[,-1])
       grp=cut(y.hat.bar,c(-Inf,quantile(y.hat.bar,(1:2)/3,na.rm=T),Inf))
@@ -175,7 +175,7 @@ model.events=function(form,data,
       
       res.tbl2=ci.res$Tests
       
-
+      
       
       crv.names=colnames(res.tbl)
       grp.names=crv.names
@@ -222,18 +222,18 @@ model.events=function(form,data,
       fnl.tbl=list(tbl.crr=tbl.crr,
                    tbl.cminc=res.tbl)
       
-
+      
       
     }
     
-
+    
     
     
     
     mtd.str=paste0("A Fine-Gray (1999) proportional hazards model with ",text.list(form.vars$x.vars)," as predictor(s) of ",
                    "the primary ",y.clm," event ", pr.event, " and adjusting for the ",y.clm, 
                    " competing events ",text.list(cmp.events)," was fit to the data.")
-
+    
     
     res=list(tbl=fnl.tbl,
              txt=txt.crr,
@@ -265,7 +265,7 @@ model.binary=function(form,data,
             xlab="Model Probability Prediction",
             ylab="Observed Outcome",las=1)
   }
-
+  
   
   res=list(tbl=res.tbl,
            txt="")
@@ -283,7 +283,7 @@ model.numeric=function(form,data,
   form.vars=get.vars(form)
   x.clm=form.vars$x.var
   y.clm=form.vars$y.var
-
+  
   for (i in x.clm)
   {
     x=data[,i]
@@ -296,7 +296,7 @@ model.numeric=function(form,data,
   }
   
   clrs=define.colors(2,clr)
-
+  
   print(class(data))
   glm.res=glm(formula=form,data=data,x=T,y=T)
   print("GLM Done")
@@ -325,13 +325,13 @@ model.numeric=function(form,data,
     }
     
     if (nrow(res.tbl)>2)
-    scatter.plot(y~y.hat,temp.dset,clrs,line=1,
-                 x.name=paste0("Model Prediction of ",y.clm),
-                 y.name=paste0("Observed Value of ",y.clm),txt=1)
+      scatter.plot(y~y.hat,temp.dset,clrs,line=1,
+                   x.name=paste0("Model Prediction of ",y.clm),
+                   y.name=paste0("Observed Value of ",y.clm),txt=1)
     
   }
-    
-
+  
+  
   if (fig>1) 
   {
     if(nrow(res.tbl)==2)
@@ -395,16 +395,16 @@ model.numeric=function(form,data,
       
       
     }
-
+    
   }
-
+  
   if (fig>3) bar.plot("r",temp.dset,paste0(y.clm," Error (Actual-Predicted)"),clr=clrs[2])
   if (fig>4) nqq.plot("r",temp.dset,paste0(y.clm," Error (Actual-Predicted)"),clr)
-
+  
   res=model.txt(glm.res)
   
   
-
+  
   return(res)
   
 }
@@ -445,7 +445,7 @@ model.txt=function(model.result)
   ass.mthd=NULL
   
   
-
+  
   if (model.class[1]=="coxph")
   {
     CI.tbl=exp(CI.tbl)
@@ -453,6 +453,7 @@ model.txt=function(model.result)
                   LB95=CI.tbl[,1],
                   UB95=CI.tbl[,2],
                   p=coef.tbl[,"Pr(>|z|)"])
+    rownames(res.tbl)=rownames(coef.tbl)
     model.type="Cox"
     y.txt=paste0("rate of ",y.var," events")
     
@@ -507,8 +508,8 @@ model.txt=function(model.result)
     }
   }
   
-
-
+  
+  
   if (length(res.levels)>0)
   {
     for(i in 1:length(res.levels))
@@ -526,7 +527,7 @@ model.txt=function(model.result)
     
     rownames(ref.grps)=ref.grps$coef.name
     common.names=intersect(rownames(ref.grps),rownames(res.tbl))
-
+    
     # write narratives for categorical predictors
     if (length(common.names)>0)
     {
@@ -552,7 +553,7 @@ model.txt=function(model.result)
       }
     }
   }
-    
+  
   # write narratives for numeric predictors
   num.names=names(term.classes[term.classes=="numeric"])
   #print(num.names)
@@ -579,20 +580,20 @@ model.txt=function(model.result)
                      res.tbl[num.names,"p"],").  ")
       res.txt=c(res.txt,num.txt)
     }
-
+    
   }
-    
-    
-
-    
-
+  
+  
+  
+  
+  
   
   mtd.txt=paste0("A ",model.type," regression model with ",
                  text.list(x.var)," as ",c("a ","")[1+(length(x.var)>1)],
                  "predictor",c("","s")[1+(length(x.var)>1)]," of ",y.var,
                  " was fit to the data.  ")
   mtd.txt=c(mtd.txt,ass.mthd)
-
+  
   rsq.txt=NULL
   if (model.type=="linear")
   {
@@ -712,7 +713,7 @@ glm.tbl=function(glm.result)
     colnames(res.tbl)[1]="odds.ratio"
     return(res.tbl)
   }
-
+  
 }
 
 ###########################################

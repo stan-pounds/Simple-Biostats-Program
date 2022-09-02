@@ -11,13 +11,13 @@ model=function(form,data,
   y.clm=form.vars$y.var
   y=data[,y.clm]
   
-  if (class(y)%in%c("competing.events","Surv"))
+  if (any(class(y)%in%c("competing.events","Surv")))
   {
     res=model.events(form,data,tbl,fig,txt,clr)
     return(res)
   }
   
-  if (class(y)%in%c("numeric","double","integer"))
+  if (any(class(y)%in%c("numeric","double","integer")))
   {
     y.binary=all(is.element(y,c(0:1,NA)))
     if (is.null(clr)) clr=c("black","red")
@@ -69,7 +69,7 @@ model.events=function(form,data,
   y.clm=form.vars$y.var
   y=data[,y.clm]
   
-  if (class(y)=="Surv")
+  if (any(class(y)%in%"Surv"))
   {
     cox.res=coxph(form,data)
     cox.tbl=fit.cox(form,data)
@@ -93,7 +93,7 @@ model.events=function(form,data,
   }
   
   
-  if (class(y)=="competing.events")
+  if (any(class(y)%in%"competing.events"))
   {
     mdl.frm=model.frame(form,data,na.action=na.omit)
     mdl.terms=attr(mdl.frm,"terms")

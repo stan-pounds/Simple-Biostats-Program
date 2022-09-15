@@ -141,3 +141,15 @@ normality.test=function(x)
   res=ks.test(x,"pnorm")
   return(res)
 }
+
+
+#################################
+# fresh start
+# clean out R memory and start over
+
+fresh.start=function()
+{
+  rm(list=ls())
+  SBP.code.path="https://raw.githubusercontent.com/stan-pounds/Simple-Biostats-Program/main/"
+  source(paste0(SBP.code.path,"setup-SBP.R"))
+}

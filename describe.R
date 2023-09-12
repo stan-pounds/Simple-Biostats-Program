@@ -389,9 +389,15 @@ describe.numeric=function(x,            # variable to describe
                       "lower.quartile","upper.quartile",
                       "minimum","maximum","normality.pvalue")
   
+  #########################################
+  # Reformat x into a data set
+  xlbl=nmx
+  temp.dset=as.data.frame(x=x)
+  colnames(temp.dset)=x.name
+  
   ######################################
   # Outliers
-  res.out = outliers(clm.name, data, y.name, fig=0, txt, clr)
+  res.out = outliers(x.name,temp.dset,x.name,fig=0, txt, clr)
   
   ######################################
   # tables
@@ -400,13 +406,10 @@ describe.numeric=function(x,            # variable to describe
   
   ####################################
   # figures
-  xlbl=nmx
-  temp.dset=as.data.frame(x=x)
-  colnames(temp.dset)=x.name
 
   if (fig>0) box.plot(x.name,temp.dset,x.name,clr)
   if (fig>1) bar.plot(x.name,temp.dset,x.name,clr=clr)
-  if (fig>2) outliers(x.name,temp.dset,txt=0,clr=clr,fig=1)
+  if (fig>2) outliers(x.name,temp.dset,x.name,txt=0,clr=clr,fig=1)
   if (fig>3) nqq.plot(x.name,temp.dset,x.name,clr=clr)
 
   ##############################################

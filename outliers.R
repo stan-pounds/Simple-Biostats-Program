@@ -24,7 +24,7 @@ outliers=function(clm,dset,y.name=NULL,fig=1,txt=1,
     x.clrs=rep(clrs[1],length(x))
     x.clrs[x.out]=clrs[2]
     
-    
+    fnl.txt=NULL
     if (fig>0) 
     {
       y=jitter(rep(1,length(x)))

@@ -333,7 +333,7 @@ compare.centers=function(form,
         {
           pwc.txt=paste0("The medians of groups ",colnames(tbl2)[i]," and ",
                          rownames(tbl2)[j],c(""," do not")[1+(tbl2[j,i]>0.05)],
-                         " differ significantly ","(Holm's adjusted p = ",tbl2[i,j],"; pairwise Wilcoxon test).  ")
+                         " differ significantly ","(Holm's adjusted p = ",tbl2[j,i],"; pairwise Wilcoxon test).  ")
           txt2=c(txt2,pwc.txt)
           pwc.ref='Holm, S. (1979). A simple sequentially rejective multiple test procedure. Scandinavian Journal of Statistics, 6, 65-70. https://www.jstor.org/stable/4615733.'
           pwc.mtd=paste0("Pairwise Wilcoxon rank-sum tests with Holm's multiplicity adjustment were performed to follow-up on the significant ",

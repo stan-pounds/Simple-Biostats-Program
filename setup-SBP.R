@@ -3,7 +3,7 @@ SBP.code.path="https://raw.githubusercontent.com/stan-pounds/Simple-Biostats-Pro
 
 # specify the file names
 SBP.code.files=c("get-packages.R",
-               "describe.R","estimate.R","correlate.R",
+               "describe.R","correlate.R",
                "compare.R","model.R","colors.R",
                "print.R","figures.R","read-data.R",
                "outliers.R","resample.R","base-SBP.R",

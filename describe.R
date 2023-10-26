@@ -250,7 +250,6 @@ describe.categorical=function(x,
   if (!any(cls%in%c("character","factor","ordered")))
     stop("non-categorical x.")
   
-  print(use.all)
   
   ######################################
   # if nmx not provided then extract it from the input
@@ -269,15 +268,12 @@ describe.categorical=function(x,
   all.tbl=table(x,exclude=NULL)
   avl.tbl=table(x)
   
-  print(all.tbl)
-  print(avl.tbl)
   
   n.miss=sum(all.tbl)-sum(avl.tbl)
   
   res.tbl=avl.tbl
   if (use.all) res.tbl=all.tbl
   
-  print(res.tbl)
 
   pct.tbl=100*res.tbl/sum(res.tbl)
   
@@ -293,11 +289,8 @@ describe.categorical=function(x,
     if (fig>1) pie.plot("x",temp.dset,nmx,clr=clr,all=use.all)
   }
 
-
-  
   #######################################
   # Generate final table
-  print(res.tbl)
   final.tbl=NULL
   final.tbl=cbind.data.frame(names(res.tbl),
                                n=as.vector(res.tbl),
@@ -305,7 +298,6 @@ describe.categorical=function(x,
     
   colnames(final.tbl)=c(nmx,"n","percent")
   
-  print(final.tbl)
 
   
   ############################################

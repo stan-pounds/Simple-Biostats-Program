@@ -25,7 +25,7 @@ box.plot=function(input,data,y.name=NULL,clr="rainbow")
     boxplot(x,horizontal=T,pch=19,col=clr[1],
             ylim=x.rng,
             cex.lab=1.5,las=1,cex.axis=1.5,
-            xlab=xlbl,cex=as.numeric(length(x)>=100))
+            xlab=xlbl)
     par(mar=par.opts$mai)
   }
   
